@@ -1,0 +1,28 @@
+<resources>
+
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+    <dimen name="maxwidth">256dp</dimen>
+    <dimen name="maxheight">192dp</dimen>
+    <dimen name="marginstandard">12.8dp</dimen>
+    <dimen name="marginstandardbtn1">6.8dp</dimen>
+    <dimen name="marginstandardhalf">6.4dp</dimen>
+    <dimen name="marginstandardmore">19.2dp</dimen>
+    <dimen name="marginstandardsmall">3.2dp</dimen>
+    <dimen name="marginstandardslightmall">8.53dp</dimen>
+    <dimen name="marginstandardsmalllist">0.53dp</dimen>
+    <dimen name="smallheight">29.87dp</dimen>
+    <dimen name="tvmargin">4.26dp</dimen>
+    <dimen name="tv1">5.33dp</dimen>
+    <dimen name="progressWidth">168.53dp</dimen>
+    <dimen name="progressheight">2.13dp</dimen>
+    <dimen name="buttonMargin">21.33dp</dimen>
+    <dimen name="dialogbtnmargin">34.87dp</dimen>
+    <dimen name="dialogWidth">213.33dp</dimen>
+    <dimen name="dialogheight">100.33dp</dimen>
+    <dimen name="dialogmargin">16dp</dimen>
+    <dimen name="btnwidth">13dp</dimen>
+    <dimen name="btnheight">6.4dp</dimen>
+    <dimen name="dialogbtnmarginleft">100.87dp</dimen>
+</resources>
