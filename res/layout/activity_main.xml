@@ -1,6 +1,6 @@
 <LinearLayout
-    android:layout_width="@dimen/maxwidth"
-    android:layout_height="@dimen/maxwidth"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:descendantFocusability="blocksDescendants"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:background="@android:color/white"
@@ -8,7 +8,7 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
     <RelativeLayout
-        android:layout_alignParentTop="true"
+        android:id="@+id/relative"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <TextView
@@ -31,12 +31,13 @@
             android:layout_height="@dimen/marginstandardhalf"/>
      </RelativeLayout>
      <RelativeLayout
-         android:layout_width="wrap_content"
+         android:layout_below="@id/relative"
+         android:layout_width="match_parent"
          android:layout_height="wrap_content">
          <LinearLayout
              android:layout_alignParentLeft="true"
-             android:layout_width="wrap_content"
-             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
              android:orientation="vertical">
              <TextView
                  android:layout_marginTop="@dimen/marginstandardmore"
@@ -65,28 +66,25 @@
              android:layout_height="@dimen/marginstandard"/>
      </RelativeLayout>
      <TextView
-         android:layout_marginTop="@dimen/marginstandardslightmall"
+         android:visibility="gone"
          android:layout_marginLeft="@dimen/marginstandard"
          android:layout_marginRight="@dimen/marginstandard"
-         android:layout_width="fill_parent"
-         android:layout_height="@dimen/marginstandardsmalllist"
+         android:layout_width="match_parent"
+         android:layout_height="wrap_content"
          android:background="#DDDDDD"/>
 
     <RelativeLayout
          android:id="@+id/show_no_update"
          android:visibility="gone"
          android:layout_width="match_parent"
-         android:layout_height="56dp">
+         android:layout_height="match_parent">
          <TextView
              android:id="@+id/showNoNet1"
              android:layout_alignParentLeft="true"
-             android:layout_marginTop="20dp"
-             android:layout_marginBottom="20dp"
-             android:layout_marginLeft="24dp"
              android:layout_width="wrap_content"
-             android:layout_height="16dp"
+             android:layout_height="fill_parent"
              android:text="@string/There_is_not_update"
-             android:textSize="14px"
+             android:textSize="10px"
              android:textColor="#333333"/>
          <TextView
              android:layout_alignParentBottom="true"
@@ -174,10 +172,10 @@
             android:textColor="#5D35B1"/>
     </RelativeLayout>
     <TextView
-        android:layout_marginTop="@dimen/marginstandardslightmall"
+        android:visibility="gone"
         android:layout_marginLeft="@dimen/marginstandard"
         android:layout_marginRight="@dimen/marginstandard"
         android:layout_width="fill_parent"
-        android:layout_height="@dimen/marginstandardsmalllist"
+        android:layout_height="wrap_content"
         android:background="#DDDDDD"/>
 </LinearLayout>

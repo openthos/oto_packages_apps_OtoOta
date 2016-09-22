@@ -10,7 +10,7 @@
     <dimen name="marginstandardhalf">6.4dp</dimen>
     <dimen name="marginstandardmore">19.2dp</dimen>
     <dimen name="marginstandardsmall">3.2dp</dimen>
-    <dimen name="marginstandardslightmall">8.53dp</dimen>
+    <dimen name="marginstandardslightmall">6.53dp</dimen>
     <dimen name="marginstandardsmalllist">0.53dp</dimen>
     <dimen name="smallheight">29.87dp</dimen>
     <dimen name="tvmargin">4.26dp</dimen>
