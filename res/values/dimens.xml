@@ -3,7 +3,7 @@
     <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="maxwidth">256dp</dimen>
     <dimen name="maxheight">260dp</dimen>
-    <dimen name="maxmargintop">80dp</dimen>
+    <dimen name="maxmargintop">40dp</dimen>
     <dimen name="marginstandardtop">10dp</dimen>
     <dimen name="margin">40dp</dimen>
     <dimen name="marginstandardleft">20dp</dimen>
