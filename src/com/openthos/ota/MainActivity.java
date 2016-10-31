@@ -277,7 +277,8 @@ public class MainActivity extends Activity{
                                 e.printStackTrace();
                             }
                         }
-                        MyReader.writeFile(upFile, "upadte.zip");
+                        String updatename = mDownloadFile.getName();
+                        MyReader.writeFile(upFile,updatename);
                         mShowHaveUpdate.setVisibility(View.GONE);
                         showMyDialog(MainActivity.this);
                     } else {
