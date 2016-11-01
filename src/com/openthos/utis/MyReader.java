@@ -58,7 +58,7 @@ public class MyReader {
         try {
             mFw = new FileWriter(file);
             mFw.write(fileName + "\n");
-            mFw.write("1");
+            mFw.write("1"+"\n");
             mFw.flush();
         } catch (Exception e) {
         } finally {
