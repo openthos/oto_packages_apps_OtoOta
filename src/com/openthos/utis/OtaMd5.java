@@ -6,7 +6,7 @@ import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 
-public class Md5 {
+public class OtaMd5 {
 
     private final static int MD5_BUF_MAX = 1024;
     private final static int MD5_NUMBER_LEN = 16;

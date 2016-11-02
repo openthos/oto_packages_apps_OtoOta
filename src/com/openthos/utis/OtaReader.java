@@ -9,7 +9,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import android.os.Environment;
 
-public class MyReader {
+public class OtaReader {
     private static BufferedReader mBr;
     public  static  ArrayList<String> getArraylist(File file) {
         ArrayList<String> mAl = new ArrayList<String>();

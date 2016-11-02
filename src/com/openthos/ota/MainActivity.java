@@ -25,8 +25,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
-import com.openthos.utis.MyReader;
-import com.openthos.utis.Md5;
+import com.openthos.utis.OtaReader;
+import com.openthos.utis.OtaMd5;
 
 public class MainActivity extends Activity{
     private File mOtaFile = null;
@@ -36,7 +36,7 @@ public class MainActivity extends Activity{
     private ProgressBar mProgressBar;
     private SharedPreferences mSharedPreferences;
     private SharedPreferences.Editor mEditor;
-    private final static String CURRENT_VERSION = "1.8.7";
+    private  String CURRENT_VERSION = null;
     private ArrayList<String> alUpDate;
     private TextView mError;
     private TextView mPrtv;
@@ -67,6 +67,15 @@ public class MainActivity extends Activity{
         initView();
         setListen();
         initData();
+    }
+
+    private String CurrentVersion() {
+        String path = "/system/version";
+        if (new File(path).exists()) {
+            String[] data = OtaReader.getFileDes(new File(path)).split("\n");
+            return CURRENT_VERSION = data[0].split(":")[1];
+        }
+        return CURRENT_VERSION;
     }
 
     private void initData() {
@@ -108,7 +117,7 @@ public class MainActivity extends Activity{
             @Override
             public void onSuccess(ResponseInfo<File> responseInfo) {
                 if (mOtaFile.exists()) {
-                    alUpDate = MyReader.getArraylist(mOtaFile);
+                    alUpDate = OtaReader.getArraylist(mOtaFile);
                     String str = alUpDate.get(0);
                     //Version=1.8.８
                     String[] strings = str.split("=");
@@ -175,7 +184,7 @@ public class MainActivity extends Activity{
             @Override
             public void onSuccess(ResponseInfo<File> responseInfo) {
                 if (mReleaseNoteFile.exists()) {
-                    String str = MyReader.getFileDes(mReleaseNoteFile);
+                    String str = OtaReader.getFileDes(mReleaseNoteFile);
                     new AlertDialog.Builder(MainActivity.this)
                         .setTitle(getResources().getString(R.string.update_introduce))
                         .setMessage(str)
@@ -262,8 +271,8 @@ public class MainActivity extends Activity{
             @Override
             public void onSuccess(ResponseInfo<File> responseInfo) {
                 if (mDownloadFile.exists()) {
-                    String fileMD5 = Md5.getFileMD5(mDownloadFile);
-                    ArrayList<String> arr = MyReader.getArraylist(mMd5File);
+                    String fileMD5 = OtaMd5.getFileMD5(mDownloadFile);
+                    ArrayList<String> arr = OtaReader.getArraylist(mMd5File);
                     String[] checkMD5Info = arr.get(0).split("=");
                     String checkMD5 = checkMD5Info[1].trim();
                     if (fileMD5.equals(checkMD5)) {
@@ -278,7 +287,7 @@ public class MainActivity extends Activity{
                             }
                         }
                         String updatename = mDownloadFile.getName();
-                        MyReader.writeFile(upFile,updatename);
+                        OtaReader.writeFile(upFile,updatename);
                         mShowHaveUpdate.setVisibility(View.GONE);
                         showMyDialog(MainActivity.this);
                     } else {
