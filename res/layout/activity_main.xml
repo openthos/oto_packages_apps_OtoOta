@@ -30,12 +30,22 @@
     </FrameLayout>
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/currentVersion">
+        android:layout_height="wrap_content"
+        android:id="@+id/currentVersion"
+        android:visibility="gone">
         <TextView
             android:id="@+id/The_current_version"
-            android:text="@string/The_current_version"
+            android:text="@string/current_version"
             android:textSize="20px"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/marginstandardtop"
+            android:gravity="center"/>
+        <TextView
+            android:id="@+id/current_version"
+            android:textSize="20px"
+            android:layout_toRightOf="@+id/The_current_version"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
@@ -49,21 +59,22 @@
         android:visibility="gone">
         <TextView
             android:id="@+id/shownewversion"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/openthosbeta1.8.8_str"
-            android:textSize="20px"
-            android:gravity="center"
-            android:layout_alignParentTop="true"/>
-        <Button
-            android:id="@+id/update_introduce"
-            android:layout_below="@+id/shownewversion"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/introduce"
-            android:textSize="15px"
-            android:layout_centerInParent="true"
-            android:layout_marginTop="@dimen/marginstandardtop" />
+            android:text="@string/openthos_new_version"
+            android:textSize="20px"
+            android:gravity="center"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/marginstandardtop"/>
+        <TextView
+            android:id="@+id/newversion"
+            android:layout_toRightOf="@+id/shownewversion"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="20px"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/marginstandardtop"
+            android:gravity="center"/>
     </RelativeLayout>
     <RelativeLayout
         android:id="@+id/updateNow"
@@ -72,26 +83,37 @@
         android:visibility="gone">
         <Button
             android:id="@+id/updateNowButton"
+            android:layout_below="@+id/update_introduce"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/updatenow"
             android:textSize="15px"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="@dimen/marginstandardtop"/>
+            android:gravity="center"/>
+        <Button
+            android:id="@+id/update_introduce"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/introduce"
+            android:textSize="15px"
+            android:layout_alignParentTop="true"
+            android:gravity="center"
+            android:layout_centerHorizontal="true"/>
     </RelativeLayout>
     <RelativeLayout
+        android:id="@+id/errorlayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:visibility="gone">
         <TextView
             android:id="@+id/error"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/error"
             android:textSize="20px"
-            android:layout_marginTop="@dimen/marginstandardtop"
+            android:layout_alignParentTop="true"
             android:gravity="center"
-            android:layout_centerInParent="true"/>
+            android:layout_centerHorizontal="true"/>
     </RelativeLayout>
     <RelativeLayout
         android:id="@+id/showHaveUpdate"
@@ -103,7 +125,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="20px"
-            android:text="@string/loading_openthosbeta1.8.8_str"
+            android:text="@string/loading_openthos_newversion"
             android:gravity="center"
             android:layout_centerInParent="true"/>
         <ProgressBar

@@ -40,10 +40,13 @@ public class MainActivity extends Activity{
     private ArrayList<String> alUpDate;
     private TextView mError;
     private TextView mPrtv;
+    private TextView mcurrent;
+    private TextView mnewversion;
     private RelativeLayout mUpdate;
     private RelativeLayout mShowHaveUpdate;
     private RelativeLayout mCurrentVersion;
     private RelativeLayout mUpdateNow;
+    private RelativeLayout mErrorlayout;
     private Button mUpdateNowButton;
     private Button mUpdate_introduce;
     private final static int TIMER_CLOSING_PAGE_INTERVAL = 5000; // 5 second.
@@ -89,6 +92,8 @@ public class MainActivity extends Activity{
 
     private void initView() {
         mUpdate = (RelativeLayout) findViewById(R.id.update);
+        mcurrent= (TextView) findViewById(R.id.current_version);
+        mnewversion=(TextView) findViewById(R.id.newversion);
         mError = (TextView) findViewById(R.id.error);
         mPrtv = (TextView) findViewById(R.id.prtv);
         mUpdate_introduce = (Button) findViewById(R.id.update_introduce);
@@ -96,7 +101,7 @@ public class MainActivity extends Activity{
         mUpdateNowButton = (Button) findViewById(R.id.updateNowButton);
         mShowHaveUpdate = (RelativeLayout) findViewById(R.id.showHaveUpdate);
         mCurrentVersion = (RelativeLayout) findViewById(R.id.currentVersion);
-
+        mErrorlayout=(RelativeLayout) findViewById(R.id.errorlayout);
     }
 
     //downLoadnewVersieon(getDownloadUrl(update),gtDonwloadPath() + "/update.txt");
@@ -122,23 +127,34 @@ public class MainActivity extends Activity{
                     //Version=1.8.８
                     String[] strings = str.split("=");
                     String version = strings[1];
-                    if (!version.equals(CURRENT_VERSION)) {
+                    if (!version.equals("")&&!version.equals(CURRENT_VERSION)) {
                         mCurrentVersion.setVisibility(View.GONE);
                         mUpdate.setVisibility(View.VISIBLE);
+                        mnewversion.setText(version);
                         mUpdateNow.setVisibility(View.VISIBLE);
-                    }else {
-                        mCurrentVersion.setVisibility(View.GONE);
-                        mUpdate.setVisibility(View.GONE);
+                    } else {mUpdate.setVisibility(View.GONE);
                         mUpdateNow.setVisibility(View.GONE);
-                        mError.setText(getResources().getString(R.string.errorNet));
+                        mCurrentVersion.setVisibility(View.VISIBLE);
+                        CurrentVersion();
+                        mcurrent.setText(CURRENT_VERSION);
+                        mErrorlayout.setVisibility(View.VISIBLE);
+                        mError.setText(getResources().getString(R.string.errornotice));
                     }
+                } else {
+                       mErrorlayout.setVisibility(View.VISIBLE);
+                       mError.setText(getResources().getString(R.string.errornotice));
+                       mCurrentVersion.setVisibility(View.VISIBLE);
+                       CurrentVersion();
+                       mcurrent.setText(CURRENT_VERSION);
                 }
             }
             @Override
             public void onFailure(HttpException e, String s) {
-                mCurrentVersion.setVisibility(View.GONE);
-                mError.setVisibility(View.VISIBLE);
+                mErrorlayout.setVisibility(View.VISIBLE);
                 mError.setText(getResources().getString(R.string.errorNet));
+                mCurrentVersion.setVisibility(View.VISIBLE);
+                CurrentVersion();
+                mcurrent.setText(CURRENT_VERSION);
             }
         });
     }
@@ -185,21 +201,25 @@ public class MainActivity extends Activity{
             public void onSuccess(ResponseInfo<File> responseInfo) {
                 if (mReleaseNoteFile.exists()) {
                     String str = OtaReader.getFileDes(mReleaseNoteFile);
-                    new AlertDialog.Builder(MainActivity.this)
-                        .setTitle(getResources().getString(R.string.update_introduce))
+                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                    builder.setTitle(getResources().getString(R.string.update_introduce))
                         .setMessage(str)
                         .setPositiveButton(getResources().getString(R.string.confirm),
                          new DialogInterface.OnClickListener() {
                              @Override
                              public void onClick(DialogInterface dialog, int which) {
                              }
-                         }).show();
+                         });
+                    AlertDialog ad= builder.create();
+                    ad.setCanceledOnTouchOutside(false);
+                    ad.setCancelable(false);
+                    ad.show();
                 }
             }
             @Override
             public void onFailure(HttpException e, String s) {
-                mError.setVisibility(View.VISIBLE);
-                mError.setText(getResources().getString(R.string.errorNet));
+                mErrorlayout.setVisibility(View.VISIBLE);
+                mError.setText(getResources().getString(R.string.error));
             }
         });
     }
@@ -239,14 +259,14 @@ public class MainActivity extends Activity{
                         mDownloadFile.delete();
                     }
                     downLoadUpdateFile(getDownloadUrl(mDownloadFileName), mDownloadFilePath);
-                    mError.setVisibility(View.VISIBLE);
-                    mError.setText("Download failed");
+                   //Errorlayout.setVisibility(View.VISIBLE);
+                   //Error.setText(getResources().getString(R.string.error));
                 }
             }
             @Override
             public void onFailure(HttpException e, String s) {
-                mError.setVisibility(View.VISIBLE);
-                mError.setText(getResources().getString(R.string.errorNet));
+                mErrorlayout.setVisibility(View.VISIBLE);
+                mError.setText(getResources().getString(R.string.error));
             }
         });
     }
@@ -266,7 +286,7 @@ public class MainActivity extends Activity{
                 mProgressBar.setMax((int) total);
                 mProgressBar.setProgress((int) current);
                 int percent = ((int) (current / total) * 100);
-                mPrtv.setText("loading...");
+                mPrtv.setText(getResources().getString(R.string.loading));
             }
             @Override
             public void onSuccess(ResponseInfo<File> responseInfo) {
@@ -312,19 +332,21 @@ public class MainActivity extends Activity{
                         timer.schedule(task, TIMER_CLOSING_PAGE_INTERVAL);
                     }
                 } else {
-                    mError.setVisibility(View.VISIBLE);
-                    mError.setText(getResources().getString(R.string.errorNet));
+                    mErrorlayout.setVisibility(View.VISIBLE);
+                    mError.setText(getResources().getString(R.string.error));
                 }
             }
             @Override
             public void onFailure(HttpException e, String s) {
+                mErrorlayout.setVisibility(View.VISIBLE);
+                mError.setText(getResources().getString(R.string.error));
             }
         });
     }
 
     //http://192.168.0.180/openthos/oto_ota.ver
     private String getDownloadUrl(String url) {
-        String basePath = "http://192.168.0.180/openthos/";
+        String basePath = "http://dev.openthos.org/openthos/";
         String path = basePath + url;
         return path;
     }
@@ -349,8 +371,8 @@ public class MainActivity extends Activity{
     }
 
     public void showMyDialog(Context context) {
-        new AlertDialog.Builder(context)
-            .setTitle(getResources().getString(R.string.downloadsucessdate))
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setTitle(getResources().getString(R.string.downloadsucessdate))
             .setMessage(getResources().getString(R.string.downloadsucess))
             .setPositiveButton(getResources().getString(R.string.install),
                 new DialogInterface.OnClickListener() {
@@ -365,10 +387,14 @@ public class MainActivity extends Activity{
                     new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            mError.setVisibility(View.VISIBLE);
+                            mErrorlayout.setVisibility(View.VISIBLE);
                             mError.setText(getResources().getString(R.string.System_update));
                         }
-                    }).show();
+                    });
+        AlertDialog ad = builder.create();
+        ad.setCanceledOnTouchOutside(false);
+        ad.setCancelable(false);
+        ad.show();
     }
 
     public void getFinish() {
