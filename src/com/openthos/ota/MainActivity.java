@@ -16,6 +16,8 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.net.Uri;
+import android.database.Cursor;
 import com.lidroid.xutils.HttpUtils;
 import com.lidroid.xutils.exception.HttpException;
 import com.lidroid.xutils.http.ResponseInfo;
@@ -46,6 +48,7 @@ public class MainActivity extends Activity{
     private RelativeLayout mShowHaveUpdate;
     private RelativeLayout mCurrentVersion;
     private RelativeLayout mUpdateNow;
+    private RelativeLayout mUpdateIntroduce;
     private RelativeLayout mErrorlayout;
     private Button mUpdateNowButton;
     private Button mUpdate_introduce;
@@ -98,6 +101,7 @@ public class MainActivity extends Activity{
         mPrtv = (TextView) findViewById(R.id.prtv);
         mUpdate_introduce = (Button) findViewById(R.id.update_introduce);
         mUpdateNow = (RelativeLayout) findViewById(R.id.updateNow);
+        mUpdateIntroduce = (RelativeLayout) findViewById(R.id.updateIntroduce);
         mUpdateNowButton = (Button) findViewById(R.id.updateNowButton);
         mShowHaveUpdate = (RelativeLayout) findViewById(R.id.showHaveUpdate);
         mCurrentVersion = (RelativeLayout) findViewById(R.id.currentVersion);
@@ -132,8 +136,10 @@ public class MainActivity extends Activity{
                         mUpdate.setVisibility(View.VISIBLE);
                         mnewversion.setText(version);
                         mUpdateNow.setVisibility(View.VISIBLE);
+                        mUpdateIntroduce.setVisibility(View.VISIBLE);
                     } else {mUpdate.setVisibility(View.GONE);
                         mUpdateNow.setVisibility(View.GONE);
+                        mUpdateIntroduce.setVisibility(View.GONE);
                         mCurrentVersion.setVisibility(View.VISIBLE);
                         CurrentVersion();
                         mcurrent.setText(CURRENT_VERSION);
@@ -158,7 +164,6 @@ public class MainActivity extends Activity{
             }
         });
     }
-
     private void setListen() {
         mUpdate_introduce.setOnClickListener(new OnClickListener() {
             @Override
@@ -173,7 +178,6 @@ public class MainActivity extends Activity{
             }
         });
     }
-
     private void updateDescription() {
         String  mReleaseNoteFileName = alUpDate.get(1).split("=")[1];
         String  mReleaseNoteFilePath = getDonwloadPath() + "/" + mReleaseNoteFileName;
@@ -188,6 +192,7 @@ public class MainActivity extends Activity{
         HttpUtils httpUtils = new HttpUtils();
         httpUtils.configTimeout(TIMER_CLOSING_PAGE_INTERVAL);
         httpUtils.configSoTimeout(TIMER_CHECK_VERSION_INTERVAL);
+
         httpUtils.download(url, path, true, false, new RequestCallBack<File>() {
             @Override
             public void onStart() {
@@ -236,6 +241,7 @@ public class MainActivity extends Activity{
         mShowHaveUpdate.setVisibility(View.VISIBLE);
         mUpdate.setVisibility(View.GONE);
         mUpdateNow.setVisibility(View.GONE);
+        mUpdateIntroduce.setVisibility(View.GONE);
     }
 
     private void downLoadMd5(final String url, final String path) {
@@ -311,15 +317,6 @@ public class MainActivity extends Activity{
                         mShowHaveUpdate.setVisibility(View.GONE);
                         showMyDialog(MainActivity.this);
                     } else {
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                mDownloadFile.delete();
-                                mMd5File.delete();
-                                mReleaseNoteFile.delete();
-                                mOtaFile.delete();
-                            }
-                        });
                         mShowHaveUpdate.setVisibility(View.GONE);
                         Timer timer = new Timer();
                         mOtaFile.delete();
@@ -347,8 +344,13 @@ public class MainActivity extends Activity{
     //http://192.168.0.180/openthos/oto_ota.ver
     private String getDownloadUrl(String url) {
         String basePath = "http://dev.openthos.org/openthos/";
-        String path = basePath + url;
-        return path;
+        Uri uriQuery = Uri.parse("content://com.otosoft.tools.myprovider/upgradeUrl");
+        Cursor cursor = getContentResolver().query(uriQuery, null, null, null, null);
+        if (cursor != null && cursor.moveToNext()) {
+            basePath = cursor.getString(cursor.getColumnIndex("upgradeUrl"));
+        }
+        cursor.close();
+        return basePath + url;
     }
 
     private String getDonwloadPath() {

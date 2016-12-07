@@ -83,20 +83,24 @@
         android:visibility="gone">
         <Button
             android:id="@+id/updateNowButton"
-            android:layout_below="@+id/update_introduce"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/updatenow"
             android:textSize="15px"
             android:layout_centerHorizontal="true"
             android:gravity="center"/>
+    </RelativeLayout>
+    <RelativeLayout
+        android:id="@+id/updateIntroduce"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone">
         <Button
             android:id="@+id/update_introduce"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/introduce"
             android:textSize="15px"
-            android:layout_alignParentTop="true"
             android:gravity="center"
             android:layout_centerHorizontal="true"/>
     </RelativeLayout>

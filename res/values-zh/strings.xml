@@ -2,11 +2,11 @@
 <resources>
     <string name="app_name">OpenthosOta</string>
     <string name="update_introduce">更新说明</string>
-    <string name="errorNet">网络连接失败,请确认网络连接已成功</string>
+    <string name="errorNet">网络异常或更新地址异常</string>
     <string name="The_current_version">当前版本是最新版本</string>
     <string name="current_version">当前版本号</string>
     <string name="There_is_not_update">下载升级文件失败</string>
-    <string name="System_update">更新文件已下载完戺重启完成安装</string>
+    <string name="System_update">更新文件已下载。请重启以使用新的升级系统。</string>
     <string name="confirm">确定</string>
     <string name="introduce">更新说明</string>
     <string name="updatenow">立即更新</string>
@@ -16,6 +16,8 @@
     <string name="openthos_new_version">发现新版本丨稳定版</string>
     <string name="loading_openthos_newversion">正在下载新版本|请勿关机或拔掉电源</string>
     <string name="cancle">稍后重启</string>
+    <string name="start">开始</string>
+    <string name="stop">暂停</string>
     <string name="install">立即重启</string>
     <string name="loading">Loading</string>
     <string name="action_settings">Settings</string>
@@ -23,5 +25,5 @@
     <string name="errornotice">已是最新版本</string>
     <string name="errorMD5">MD5文件校验失败</string>
     <string name="downloadsucess">请稍后重启系统完成升级</string>
-    <string name="downloadsucessdate">升级包已下载完成</string>
+    <string name="downloadsucessdate">更新文件已下载。请重启以使用新的升级系统。</string>
 </resources>
