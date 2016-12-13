@@ -1,154 +1,169 @@
 <LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:background="@android:color/white"
     android:orientation="vertical"
     tools:context=".MainActivity">
+
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="@dimen/maxheight">
+
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/oto_ota_background"
-            android:adjustViewBounds="true"/>
+            android:adjustViewBounds="true"
+            android:background="@drawable/oto_ota_background"/>
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/otui1"
-            android:textSize="20px"
+            android:layout_gravity="center"
             android:layout_marginTop="@dimen/maxmargintop"
-            android:layout_gravity="center"/>
+            android:text="@string/otui1"
+            android:textSize="20sp"/>
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
             android:text="@string/otui"
-            android:textSize="20px"
-            android:layout_gravity="center"/>
+            android:textSize="20sp"/>
     </FrameLayout>
+
     <RelativeLayout
+        android:id="@+id/currentVersion"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/currentVersion"
         android:visibility="gone">
+
         <TextView
             android:id="@+id/The_current_version"
-            android:text="@string/current_version"
-            android:textSize="20px"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="@dimen/marginstandardtop"
-            android:gravity="center"/>
+            android:gravity="center"
+            android:text="@string/current_version"
+            android:textSize="20sp"/>
+
         <TextView
             android:id="@+id/current_version"
-            android:textSize="20px"
-            android:layout_toRightOf="@+id/The_current_version"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="@dimen/marginstandardtop"
-            android:gravity="center"/>
+            android:layout_toRightOf="@+id/The_current_version"
+            android:gravity="center"
+            android:textSize="20sp"/>
     </RelativeLayout>
+
     <RelativeLayout
         android:id="@+id/update"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:visibility="gone">
+
         <TextView
             android:id="@+id/shownewversion"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/openthos_new_version"
-            android:textSize="20px"
-            android:gravity="center"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="@dimen/marginstandardtop"/>
-        <TextView
-            android:id="@+id/newversion"
-            android:layout_toRightOf="@+id/shownewversion"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="20px"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="@dimen/marginstandardtop"
-            android:gravity="center"/>
+            android:gravity="center"
+            android:text="@string/openthos_new_version"
+            android:textSize="20sp"/>
+
+        <TextView
+            android:id="@+id/newversion"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/marginstandardtop"
+            android:layout_toRightOf="@+id/shownewversion"
+            android:gravity="center"
+            android:textSize="20sp"/>
     </RelativeLayout>
+
     <RelativeLayout
         android:id="@+id/updateNow"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:visibility="gone">
+
         <Button
             android:id="@+id/updateNowButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/updatenow"
-            android:textSize="15px"
             android:layout_centerHorizontal="true"
-            android:gravity="center"/>
+            android:gravity="center"
+            android:text="@string/updatenow"
+            android:textSize="15sp"/>
     </RelativeLayout>
+
     <RelativeLayout
         android:id="@+id/updateIntroduce"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:visibility="gone">
+
         <Button
             android:id="@+id/update_introduce"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/introduce"
-            android:textSize="15px"
+            android:layout_centerHorizontal="true"
             android:gravity="center"
-            android:layout_centerHorizontal="true"/>
+            android:text="@string/introduce"
+            android:textSize="15sp"/>
     </RelativeLayout>
+
     <RelativeLayout
         android:id="@+id/errorlayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:visibility="gone">
+
         <TextView
             android:id="@+id/error"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/error"
-            android:textSize="20px"
             android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
             android:gravity="center"
-            android:layout_centerHorizontal="true"/>
+            android:text="@string/error"
+            android:textSize="20sp"/>
     </RelativeLayout>
+
     <RelativeLayout
         android:id="@+id/showHaveUpdate"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:visibility="gone">
+        android:visibility="gone" >
+
         <TextView
             android:id="@+id/tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="20px"
-            android:text="@string/loading_openthos_newversion"
+            android:layout_centerInParent="true"
             android:gravity="center"
-            android:layout_centerInParent="true"/>
-        <ProgressBar
+            android:text="@string/loading_openthos_newversion"
+            android:textSize="20sp"/>
+
+        <com.openthos.utis.OtaProgressBar
             android:id="@+id/progressBar"
-            android:layout_below="@+id/tv"
+            style="@android:style/Widget.ProgressBar.Horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margin"
+            android:layout_height="20dp"
+            android:layout_below="@id/tv"
+            android:layout_gravity="center_vertical"
             android:layout_marginLeft="@dimen/marginstandardleft"
             android:layout_marginRight="@dimen/marginstandardright"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:max="100"/>
-        <TextView
-            android:id="@+id/prtv"
-            android:layout_below="@+id/progressBar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="20px"
-            android:text="@string/loading"
-            android:gravity="center"/>
+            android:layout_marginTop="@dimen/margin"
+            android:max="100"
+            android:progress="0"
+            />
     </RelativeLayout>
+
 </LinearLayout>
