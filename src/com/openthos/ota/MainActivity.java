@@ -12,8 +12,6 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.Display;
-import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -74,8 +72,6 @@ public class MainActivity extends Activity {
     private final static int RELEASENOTE_LINE = 1;
     private final static int MD5FILENAME_LINE = 2;
     private final static int VALUE_COLUMN = 1;
-    private final static double DIALOG_WIDTH_FACTOR = 0.5;
-    private final static double DIALOG_HEIGHT_FACTOR = 0.6;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -147,16 +143,6 @@ public class MainActivity extends Activity {
                                 ad.setCanceledOnTouchOutside(false);
                                 ad.setCancelable(false);
                                 ad.show();
-                                WindowManager windowManager = getWindowManager();
-                                Display display = windowManager.getDefaultDisplay();
-                                WindowManager.LayoutParams params = ad.getWindow().getAttributes();
-                                params.width = (int) (display.getWidth() * DIALOG_WIDTH_FACTOR);
-                                params.height = (int) (display.getHeight() * DIALOG_HEIGHT_FACTOR);
-                                params.gravity = Gravity.CENTER;
-                                ad.getWindow().setGravity(Gravity.CENTER_HORIZONTAL |
-                                                            Gravity.CENTER_VERTICAL);
-                                ad.onWindowAttributesChanged(params);
-                                ad.getWindow().setAttributes(params);
                             }
                         } else {
                             mReleaseNoteFile.delete();
@@ -480,14 +466,6 @@ public class MainActivity extends Activity {
         ad.setCanceledOnTouchOutside(false);
         ad.setCancelable(false);
         ad.show();
-        WindowManager windowManager = getWindowManager();
-        Display display = windowManager.getDefaultDisplay();
-        WindowManager.LayoutParams params = ad.getWindow().getAttributes();
-        params.width = (int) (display.getWidth() * DIALOG_WIDTH_FACTOR);
-        params.height = (int) (display.getHeight() * DIALOG_HEIGHT_FACTOR);
-        params.gravity = Gravity.CENTER;
-        ad.getWindow().setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL);
-        ad.getWindow().setAttributes(params);
     }
 
     public void getFinish() {
