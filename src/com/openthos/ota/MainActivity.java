@@ -389,8 +389,6 @@ public class MainActivity extends Activity {
                         };
                         timer.schedule(task, TIMER_CLOSING_PAGE_INTERVAL);
                     }
-                } else {
-                    Toast.makeText(MainActivity.this, R.string.error, Toast.LENGTH_SHORT).show();
                 }
             }
 
