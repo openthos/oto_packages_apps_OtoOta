@@ -13,6 +13,7 @@ import android.os.PowerManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.view.LayoutInflater;
 import android.view.View.OnClickListener;
 import android.view.Window;
 import android.view.WindowManager;
@@ -68,6 +69,8 @@ public class MainActivity extends Activity {
     private final static int OTAFILE = 0;
     private final static int RELEASENOTEFILE = 1;
     private final static int MD5FILE = 2;
+    private final static int ERRORNET = 3;
+    private final static int ERRORNOTICE = 4;
     private final static int VERSION_LINE = 0;
     private final static int RELEASENOTE_LINE = 1;
     private final static int MD5FILENAME_LINE = 2;
@@ -105,12 +108,6 @@ public class MainActivity extends Activity {
                             downLoadOtaFile();
                         } else {
                             mOtaFile.delete();
-                            mErrorlayout.setVisibility(View.VISIBLE);
-                            mError.setText(getResources().
-                            getString(R.string.errorNet));
-                            mCurrentVersion.setVisibility(View.VISIBLE);
-                            CurrentVersion();
-                            mcurrent.setText(CURRENT_VERSION);
                         }
                     } else {
                         mOtaFile.delete();
@@ -146,13 +143,10 @@ public class MainActivity extends Activity {
                             }
                         } else {
                             mReleaseNoteFile.delete();
-                            Toast.makeText(MainActivity.this, R.string.error,
-                                           Toast.LENGTH_SHORT).show();
                         }
                     } else {
                         mReleaseNoteFile.delete();
-                        Toast.makeText(MainActivity.this, R.string.error,
-                                       Toast.LENGTH_SHORT).show();
+                        mOtaFile.delete();
                     }
                     break;
                 case MD5FILE:
@@ -161,11 +155,29 @@ public class MainActivity extends Activity {
                             downLoadMd5File();
                         }
                     } else {
+                        mReleaseNoteFile.delete();
+                        mOtaFile.delete();
                         mDownloadFile.delete();
                     }
                     break;
+                case ERRORNET:
+                    mErrorlayout.setVisibility(View.VISIBLE);
+                    mError.setText(getResources().getString(R.string.errorNet));
+                    mCurrentVersion.setVisibility(View.VISIBLE);
+                    CurrentVersion();
+                    mcurrent.setText(CURRENT_VERSION);
+                    break;
+                case ERRORNOTICE:
+                    mUpdateNow.setVisibility(View.GONE);
+                    mUpdateIntroduce.setVisibility(View.GONE);
+                    mCurrentVersion.setVisibility(View.VISIBLE);
+                    CurrentVersion();
+                    mcurrent.setText(CURRENT_VERSION);
+                    mErrorlayout.setVisibility(View.VISIBLE);
+                    mError.setText(getResources().getString(R.string.errornotice));
+                    break;
                 default:
-                     break;
+                    break;
             }
             return false;
         }
@@ -215,11 +227,8 @@ public class MainActivity extends Activity {
                     message.setData(bundle);
                     mHandler.sendMessage(message);
                 } else {
-                    mErrorlayout.setVisibility(View.VISIBLE);
-                    mError.setText(getResources().getString(R.string.errorNet));
-                    mCurrentVersion.setVisibility(View.VISIBLE);
-                    CurrentVersion();
-                    mcurrent.setText(CURRENT_VERSION);
+                    Message message = mHandler.obtainMessage();
+		     mHandler.sendEmptyMessage(ERRORNET);
                 }
             }
         }).start();
@@ -231,28 +240,24 @@ public class MainActivity extends Activity {
             String str = alUpDate.get(VERSION_LINE);
             String[] strings = str.split("=");
             String version = strings[VALUE_COLUMN];
-            if (!version.equals("") && !version.equals(CURRENT_VERSION)) {
-                mCurrentVersion.setVisibility(View.GONE);
-                mUpdate.setVisibility(View.VISIBLE);
-                mnewversion.setText(version);
-                mUpdateNow.setVisibility(View.VISIBLE);
-                mUpdateIntroduce.setVisibility(View.VISIBLE);
-            } else {
-                mUpdate.setVisibility(View.GONE);
-                mUpdateNow.setVisibility(View.GONE);
-                mUpdateIntroduce.setVisibility(View.GONE);
-                mCurrentVersion.setVisibility(View.VISIBLE);
-                CurrentVersion();
-                mcurrent.setText(CURRENT_VERSION);
-                mErrorlayout.setVisibility(View.VISIBLE);
-                mError.setText(getResources().getString(R.string.errornotice));
-            }
-        } else {
-            mErrorlayout.setVisibility(View.VISIBLE);
-            mError.setText(getResources().getString(R.string.errornotice));
-            mCurrentVersion.setVisibility(View.VISIBLE);
             CurrentVersion();
-            mcurrent.setText(CURRENT_VERSION);
+            try {
+                String currentversion = CURRENT_VERSION.replace(".","");
+                String newversion = version.replace(".","");
+                int cv = Integer.parseInt(currentversion);
+                int nv = Integer.parseInt(newversion);
+                if (nv > cv) {
+                    mCurrentVersion.setVisibility(View.GONE);
+                    mUpdate.setVisibility(View.VISIBLE);
+                    mnewversion.setText(version);
+                    mUpdateNow.setVisibility(View.VISIBLE);
+                    mUpdateIntroduce.setVisibility(View.VISIBLE);
+                } else {
+                    Message message = mHandler.obtainMessage();
+                    mHandler.sendEmptyMessage(ERRORNOTICE);
+                }
+            } catch (Exception ex) {
+            }
         }
     }
 
@@ -394,10 +399,8 @@ public class MainActivity extends Activity {
 
             @Override
             public void onFailure(HttpException e, String s) {
-                if (mDownloadFile.exists()) {
-                    mDownloadFile.delete();
-                }
-                downLoadUpdateFile(url, path);
+                mShowHaveUpdate.setVisibility(View.GONE);
+                mProgressBar.setVisibility(ProgressBar. INVISIBLE );
                 Toast.makeText(MainActivity.this, R.string.error, Toast.LENGTH_SHORT).show();
             }
         });
