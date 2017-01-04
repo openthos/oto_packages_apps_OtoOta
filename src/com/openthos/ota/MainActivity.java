@@ -195,6 +195,9 @@ public class MainActivity extends Activity {
     private void initData() {
         String downloadPath = getDonwloadPath() + "/oto_ota.ver";
         mOtaFile = new File(downloadPath);
+        if (mOtaFile.exists()) {
+            mOtaFile.delete();
+        }
         downLoadnewVersion(getDownloadUrl("oto_ota.ver"), downloadPath);
     }
 
