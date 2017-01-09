@@ -32,6 +32,13 @@ public class OtaMd5 {
         }
         BigInteger bigInt = new BigInteger(1, digest.digest());
         System.out.println("" + bigInt.toString(MD5_NUMBER_LEN));
-        return bigInt.toString(MD5_NUMBER_LEN);
+        String s = bigInt.toString(MD5_NUMBER_LEN);
+        if (s.length() < MD5_NUMBER_LEN * 2) {
+            int i = MD5_NUMBER_LEN * 2 - s.length();
+            while (i-- > 0) {
+                s = "0" + s;
+            }
+        }
+        return s;
     }
 }
