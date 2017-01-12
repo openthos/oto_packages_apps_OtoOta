@@ -16,6 +16,8 @@ import android.view.View;
 import android.view.LayoutInflater;
 import android.view.View.OnClickListener;
 import android.view.Window;
+import android.view.Display;
+import android.view.Gravity;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ProgressBar;
@@ -75,6 +77,8 @@ public class MainActivity extends Activity {
     private final static int RELEASENOTE_LINE = 1;
     private final static int MD5FILENAME_LINE = 2;
     private final static int VALUE_COLUMN = 1;
+    private final static double DIALOG_WIDTH_FACTOR = 0.2;
+    private final static double DIALOG_HEIGHT_FACTOR = 0.5;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -140,6 +144,7 @@ public class MainActivity extends Activity {
                                 ad.setCanceledOnTouchOutside(false);
                                 ad.setCancelable(false);
                                 ad.show();
+                                initDialog(ad);
                             }
                         } else {
                             mReleaseNoteFile.delete();
@@ -214,6 +219,19 @@ public class MainActivity extends Activity {
         mCurrentVersion = (RelativeLayout) findViewById(R.id.currentVersion);
         mErrorlayout = (RelativeLayout) findViewById(R.id.errorlayout);
         mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
+    }
+
+    private void initDialog(AlertDialog ad) {
+        WindowManager windowManager = getWindowManager();
+        Display display = windowManager.getDefaultDisplay();
+        WindowManager.LayoutParams params = ad.getWindow().getAttributes();
+        params.width = (int) (display.getWidth() * DIALOG_WIDTH_FACTOR);
+        params.height = (int) (display.getHeight() * DIALOG_HEIGHT_FACTOR);
+        params.gravity = Gravity.CENTER;
+        ad.getWindow().setGravity(Gravity.CENTER_HORIZONTAL |
+                                    Gravity.CENTER_VERTICAL);
+        ad.onWindowAttributesChanged(params);
+        ad.getWindow().setAttributes(params);
     }
 
     private void downLoadnewVersion(final String url, final String path) {
@@ -470,6 +488,7 @@ public class MainActivity extends Activity {
         ad.setCanceledOnTouchOutside(false);
         ad.setCancelable(false);
         ad.show();
+        initDialog(ad);
     }
 
     public void getFinish() {
