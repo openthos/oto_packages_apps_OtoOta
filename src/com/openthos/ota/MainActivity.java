@@ -26,6 +26,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.net.Uri;
 import android.database.Cursor;
+import android.provider.Settings;
 
 import com.lidroid.xutils.HttpUtils;
 import com.lidroid.xutils.http.HttpHandler;
@@ -429,19 +430,13 @@ public class MainActivity extends Activity {
 
     //http://192.168.0.180/openthos/oto_ota.ver
     private String getDownloadUrl(String url) {
-        String basePath = "";
-        Uri uriQuery = Uri.parse("content://com.otosoft.tools.myprovider/upgradeUrl");
-        if (uriQuery != null) {
-            Cursor cursor = getContentResolver().query(uriQuery, null, null, null, null);
-            if (cursor != null && cursor.moveToNext()) {
-                basePath = cursor.getString(cursor.getColumnIndex("upgradeUrl"));
-                cursor.close();
-            }
-        }
-        if (TextUtils.isEmpty(basePath)) {
-            basePath = "http://dev.openthos.org/openthos/";
-        }
-        return basePath + url;
+        String unDefaultUpgradeUrl = Settings.Global.getString(getContentResolver(),
+                                            Settings.Global.SYS_UPGRADE_URL);
+        String defaultUpgradeUrl = Settings.Global.getString(getContentResolver(),
+                                            Settings.Global.SYS_UPGRADE_DEFAULT_URL);
+        boolean defaultChecked = Settings.Global.getBoolean(getContentResolver(),
+                                            Settings.Global.SYS_UPGRADE_DEFAULT, true);
+        return defaultChecked ? defaultUpgradeUrl + url : unDefaultUpgradeUrl + url;
     }
 
     private String getDonwloadPath() {
