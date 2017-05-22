@@ -145,7 +145,7 @@ public class MainActivity extends Activity {
                                 ad.setCanceledOnTouchOutside(false);
                                 ad.setCancelable(false);
                                 ad.show();
-                                initDialog(ad);
+                                //initDialog(ad);
                             }
                         } else {
                             mReleaseNoteFile.delete();
@@ -483,7 +483,7 @@ public class MainActivity extends Activity {
         ad.setCanceledOnTouchOutside(false);
         ad.setCancelable(false);
         ad.show();
-        initDialog(ad);
+        //initDialog(ad);
     }
 
     public void getFinish() {
