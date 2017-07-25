@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">OpenthosOta</string>
+    <string name="app_name">系统升级</string>
     <string name="update_introduce">更新说明</string>
     <string name="errorNet">网络异常或更新地址异常</string>
     <string name="The_current_version">当前版本是最新版本</string>
