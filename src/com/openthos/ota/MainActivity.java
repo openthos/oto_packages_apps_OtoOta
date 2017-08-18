@@ -2,8 +2,11 @@ package com.openthos.ota;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Environment;
@@ -34,11 +37,16 @@ import com.lidroid.xutils.exception.HttpException;
 import com.lidroid.xutils.http.ResponseInfo;
 import com.lidroid.xutils.http.callback.RequestCallBack;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import com.openthos.utis.OtaNetUtils;
 import com.openthos.utis.OtaReader;
@@ -63,8 +71,12 @@ public class MainActivity extends Activity {
     private RelativeLayout mUpdateNow;
     private RelativeLayout mUpdateIntroduce;
     private RelativeLayout mErrorlayout;
+    private RelativeLayout mManualUpdate;
+
     private Button mUpdateNowButton;
     private Button mUpdate_introduce;
+    private Button mUpdateManualButton;
+
     private HttpHandler<File> http1;
     private String mNetStr;
     private final static int TIMER_CLOSING_PAGE_INTERVAL = 3000; // 3 second.
@@ -118,7 +130,7 @@ public class MainActivity extends Activity {
                         mOtaFile.delete();
                         mErrorlayout.setVisibility(View.VISIBLE);
                         mError.setText(getResources().
-                        getString(R.string.errorNet));
+                                getString(R.string.errorNet));
                         mCurrentVersion.setVisibility(View.VISIBLE);
                         CurrentVersion();
                         mcurrent.setText(CURRENT_VERSION);
@@ -130,17 +142,17 @@ public class MainActivity extends Activity {
                             if (mReleaseNoteFile.exists()) {
                                 String str = OtaReader.getFileDes(mReleaseNoteFile);
                                 AlertDialog.Builder builder = new AlertDialog.
-                                                   Builder(MainActivity.this);
+                                        Builder(MainActivity.this);
                                 builder.setTitle(getResources()
-                                       .getString(R.string.update_introduce))
-                                       .setMessage(str)
-                                       .setPositiveButton(getResources()
-                                       .getString(R.string.confirm),
-                                           new DialogInterface.OnClickListener() {
-                                           @Override
-                                           public void onClick(DialogInterface dialog, int which) {
-                                           }
-                                           });
+                                        .getString(R.string.update_introduce))
+                                        .setMessage(str)
+                                        .setPositiveButton(getResources()
+                                                        .getString(R.string.confirm),
+                                                new DialogInterface.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(DialogInterface dialog, int which) {
+                                                    }
+                                                });
                                 AlertDialog ad = builder.create();
                                 ad.setCanceledOnTouchOutside(false);
                                 ad.setCancelable(false);
@@ -216,6 +228,9 @@ public class MainActivity extends Activity {
         mUpdateNow = (RelativeLayout) findViewById(R.id.updateNow);
         mUpdateIntroduce = (RelativeLayout) findViewById(R.id.updateIntroduce);
         mUpdateNowButton = (Button) findViewById(R.id.updateNowButton);
+        mManualUpdate = (RelativeLayout) findViewById(R.id.manual_update);
+        mUpdateManualButton = (Button) findViewById(R.id.update_manual);
+
         mShowHaveUpdate = (RelativeLayout) findViewById(R.id.showHaveUpdate);
         mCurrentVersion = (RelativeLayout) findViewById(R.id.currentVersion);
         mErrorlayout = (RelativeLayout) findViewById(R.id.errorlayout);
@@ -230,7 +245,7 @@ public class MainActivity extends Activity {
         params.height = (int) (display.getHeight() * DIALOG_HEIGHT_FACTOR);
         params.gravity = Gravity.CENTER;
         ad.getWindow().setGravity(Gravity.CENTER_HORIZONTAL |
-                                    Gravity.CENTER_VERTICAL);
+                Gravity.CENTER_VERTICAL);
         ad.onWindowAttributesChanged(params);
         ad.getWindow().setAttributes(params);
     }
@@ -264,8 +279,8 @@ public class MainActivity extends Activity {
             String version = strings[VALUE_COLUMN];
             CurrentVersion();
             try {
-                String currentversion = CURRENT_VERSION.replace(".","");
-                String newversion = version.replace(".","");
+                String currentversion = CURRENT_VERSION.replace(".", "");
+                String newversion = version.replace(".", "");
                 int cv = Integer.parseInt(currentversion);
                 int nv = Integer.parseInt(newversion);
                 if (nv > cv) {
@@ -296,6 +311,120 @@ public class MainActivity extends Activity {
                 updateVersion();
             }
         });
+        mUpdateManualButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent();
+                intent.setComponent(new ComponentName("com.openthos.filemanager",
+                       "com.openthos.filemanager.PickerActivity"));
+                startActivityForResult(intent, 000);
+            }
+        });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (data != null) {
+            String filePath = data.getData().getEncodedPath();
+            File f = new File(filePath);
+            if (!f.exists() || !filePath.endsWith(".zip")) {
+                Toast.makeText(this, getString(R.string.check_error), Toast.LENGTH_SHORT).show();
+                return;
+            }
+            checkUpgradeFile(f);
+        }
+    }
+
+    ProgressDialog progressDialog;
+
+    private void checkUpgradeFile(final File f) {
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage(getString(R.string.verify_package));
+        progressDialog.setCancelable(false);
+        progressDialog.show();
+        new Thread() {
+            int isOK = 0;
+            @Override
+            public void run() {
+                super.run();
+                try {
+                    ZipInputStream in = new ZipInputStream(new FileInputStream(f));
+                    ZipEntry entry = in.getNextEntry();
+                    while (entry != null) {
+                        if (entry.getName().equals("kernel")) {
+                            isOK++;
+                        } else if (entry.getName().equals("ramdisk.img")) {
+                            isOK++;
+                        } else if (entry.getName().equals("system.sfs")) {
+                            isOK++;
+                        } else if (entry.getName().equals("update.list")) {
+                            isOK++;
+                        } else if (entry.getName().equals("version")) {
+                            isOK++;
+                        }
+                        entry = in.getNextEntry();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        progressDialog.dismiss();
+                        if (isOK == 5) {
+                            choiceToUpgrade(f);
+                        } else {
+                            Toast.makeText(MainActivity.this, getString(R.string.verify_error),
+                                     Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+            }
+        }.start();
+    }
+
+    private void choiceToUpgrade(final File f) {
+        AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
+        dialog.setMessage(getString(R.string.confrim_manual));
+        dialog.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        dialog.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, final int which) {
+                progressDialog.setMessage(getString(R.string.init_upgrade));
+                progressDialog.show();
+                new Thread() {
+                    @Override
+                    public void run() {
+                        super.run();
+                        try {
+                            Process pro = Runtime.getRuntime().exec(
+                                    new String[]{"cp", f.getAbsolutePath(), getDonwloadPath()});
+                            BufferedReader in = new BufferedReader(
+                                    new InputStreamReader(pro.getInputStream()));
+                            while (in.readLine() != null) {}
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        OtaReader.writeFile(new File(getDonwloadPath() + "/update"), f.getName());
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                progressDialog.dismiss();
+                                showMyDialogBySelf();
+                            }
+                        });
+                    }
+                }.start();
+            }
+        });
+        dialog.setCancelable(false);
+        dialog.create().show();
     }
 
     private void updateDescription() {
@@ -422,7 +551,7 @@ public class MainActivity extends Activity {
             @Override
             public void onFailure(HttpException e, String s) {
                 mShowHaveUpdate.setVisibility(View.GONE);
-                mProgressBar.setVisibility(ProgressBar. INVISIBLE );
+                mProgressBar.setVisibility(ProgressBar.INVISIBLE);
                 Toast.makeText(MainActivity.this, R.string.error, Toast.LENGTH_SHORT).show();
             }
         });
@@ -467,7 +596,7 @@ public class MainActivity extends Activity {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 PowerManager powerManager = (PowerManager) MainActivity.this.
-                                getApplicationContext().getSystemService(Context.POWER_SERVICE);
+                                        getApplicationContext().getSystemService(Context.POWER_SERVICE);
                                 powerManager.reboot(null);
                             }
                         })
@@ -486,7 +615,31 @@ public class MainActivity extends Activity {
         //initDialog(ad);
     }
 
-    public void getFinish() {
-        finish();
+    public void showMyDialogBySelf() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setTitle(getResources().getString(R.string.downloadsucessdate))
+                .setMessage(getResources().getString(R.string.downloadsucess))
+                .setPositiveButton(getResources().getString(R.string.install),
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                PowerManager powerManager = (PowerManager) MainActivity.this.
+                                        getApplicationContext().getSystemService(Context.POWER_SERVICE);
+                                powerManager.reboot(null);
+                            }
+                        })
+                .setNegativeButton(getResources().getString(R.string.cancle),
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                mErrorlayout.setVisibility(View.VISIBLE);
+                                mError.setText(getResources().getString(R.string.System_update));
+                            }
+                        });
+        AlertDialog ad = builder.create();
+        ad.setCanceledOnTouchOutside(false);
+        ad.setCancelable(false);
+        ad.show();
+        //initDialog(ad);
     }
 }

@@ -25,4 +25,12 @@
     <string name="errorMD5">MD5文件校验失败</string>
     <string name="downloadsucess">请稍后重启系统完成升级</string>
     <string name="downloadsucessdate">更新文件已下载。请重启以使用新的升级系统。</string>
+    <string name="manual_update">手动升级</string>
+    <string name="verify_package">正在校验升级包</string>
+    <string name="confrim_manual">手动升级有风险，可能导致系统启动失败，是否继续？</string>
+    <string name="yes">是</string>
+    <string name="no">否</string>
+    <string name="check_error">选择的文件不是一个zip格式的升级包</string>
+    <string name="verify_error">校验升级包失败，请重新选择或下载升级包</string>
+    <string name="init_upgrade">准备升级环境</string>
 </resources>
