@@ -13,22 +13,19 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.PowerManager;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
-import android.view.LayoutInflater;
 import android.view.View.OnClickListener;
 import android.view.Window;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.net.Uri;
-import android.database.Cursor;
 import android.provider.Settings;
 
 import com.lidroid.xutils.HttpUtils;
@@ -77,8 +74,6 @@ public class MainActivity extends Activity {
     private Button mUpdate_introduce;
     private Button mUpdateManualButton;
 
-    private HttpHandler<File> http1;
-    private String mNetStr;
     private final static int TIMER_CLOSING_PAGE_INTERVAL = 3000; // 3 second.
     private final static int TIMER_CHECK_VERSION_INTERVAL = 3000; // 3second.
     private final static int OTAFILE = 0;
@@ -120,63 +115,31 @@ public class MainActivity extends Activity {
             }
             switch (msg.what) {
                 case OTAFILE:
-                    if (mNetStr != null) {
-                        if (OtaReader.writeFile(path, mNetStr, true)) {
-                            downLoadOtaFile();
-                        } else {
-                            mOtaFile.delete();
-                        }
-                    } else {
-                        mOtaFile.delete();
-                        mErrorlayout.setVisibility(View.VISIBLE);
-                        mError.setText(getResources().
-                                getString(R.string.errorNet));
-                        mCurrentVersion.setVisibility(View.VISIBLE);
-                        CurrentVersion();
-                        mcurrent.setText(CURRENT_VERSION);
-                    }
+                    downLoadOtaFile();
                     break;
                 case RELEASENOTEFILE:
-                    if (mNetStr != null) {
-                        if (OtaReader.writeFile(path, mNetStr, true)) {
-                            if (mReleaseNoteFile.exists()) {
-                                String str = OtaReader.getFileDes(mReleaseNoteFile);
-                                AlertDialog.Builder builder = new AlertDialog.
-                                        Builder(MainActivity.this);
-                                builder.setTitle(getResources()
-                                        .getString(R.string.update_introduce))
-                                        .setMessage(str)
-                                        .setPositiveButton(getResources()
-                                                        .getString(R.string.confirm),
-                                                new DialogInterface.OnClickListener() {
-                                                    @Override
-                                                    public void onClick(DialogInterface dialog, int which) {
-                                                    }
-                                                });
-                                AlertDialog ad = builder.create();
-                                ad.setCanceledOnTouchOutside(false);
-                                ad.setCancelable(false);
-                                ad.show();
-                                //initDialog(ad);
-                            }
-                        } else {
-                            mReleaseNoteFile.delete();
-                        }
-                    } else {
-                        mReleaseNoteFile.delete();
-                        mOtaFile.delete();
+                    if (mReleaseNoteFile.exists()) {
+                        String str = OtaReader.getFileDes(mReleaseNoteFile);
+                        AlertDialog.Builder builder = new AlertDialog.
+                                Builder(MainActivity.this);
+                        builder.setTitle(getResources()
+                                .getString(R.string.update_introduce))
+                                .setMessage(str)
+                                .setPositiveButton(getResources()
+                                                .getString(R.string.confirm),
+                                        new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                            }
+                                        });
+                        AlertDialog ad = builder.create();
+                        ad.setCanceledOnTouchOutside(false);
+                        ad.setCancelable(false);
+                        ad.show();
                     }
                     break;
                 case MD5FILE:
-                    if (mNetStr != null) {
-                        if (OtaReader.writeFile(path, mNetStr, true)) {
-                            downLoadMd5File();
-                        }
-                    } else {
-                        mReleaseNoteFile.delete();
-                        mOtaFile.delete();
-                        mDownloadFile.delete();
-                    }
+                    downLoadMd5File();
                     break;
                 case ERRORNET:
                     mErrorlayout.setVisibility(View.VISIBLE);
@@ -251,11 +214,13 @@ public class MainActivity extends Activity {
     }
 
     private void downLoadnewVersion(final String url, final String path) {
-        new Thread(new Runnable() {
+        HttpUtils httpUtils = new HttpUtils();
+        HttpHandler<File> http = httpUtils.download(url, path, false, false, new RequestCallBack<File>() {
             @Override
-            public void run() {
-                mNetStr = OtaNetUtils.getNetStr(MainActivity.this, url);
-                if (mNetStr != null) {
+            public void onSuccess(ResponseInfo<File> responseInfo) {
+                File f = responseInfo.result;
+                Log.i("wwww", f.length() + "");
+                if (f.length() > 0) {
                     Message message = mHandler.obtainMessage();
                     message.what = OTAFILE;
                     Bundle bundle = new Bundle();
@@ -264,11 +229,15 @@ public class MainActivity extends Activity {
                     message.setData(bundle);
                     mHandler.sendMessage(message);
                 } else {
-                    Message message = mHandler.obtainMessage();
-		     mHandler.sendEmptyMessage(ERRORNET);
+                    mHandler.sendEmptyMessage(ERRORNET);
                 }
             }
-        }).start();
+
+            @Override
+            public void onFailure(HttpException e, String s) {
+                mHandler.sendEmptyMessage(ERRORNET);
+            }
+        });
     }
 
     private void downLoadOtaFile() {
@@ -320,6 +289,7 @@ public class MainActivity extends Activity {
                 startActivityForResult(intent, 000);
             }
         });
+
     }
 
     @Override
@@ -345,6 +315,7 @@ public class MainActivity extends Activity {
         progressDialog.show();
         new Thread() {
             int isOK = 0;
+
             @Override
             public void run() {
                 super.run();
@@ -435,11 +406,12 @@ public class MainActivity extends Activity {
     }
 
     private void downLoadDescription(final String url, final String path) {
-        new Thread(new Runnable() {
+        HttpUtils httpUtils = new HttpUtils();
+        HttpHandler<File> http = httpUtils.download(url, path, false, false, new RequestCallBack<File>() {
             @Override
-            public void run() {
-                mNetStr = OtaNetUtils.getNetStr(MainActivity.this, url);
-                if (mNetStr != null) {
+            public void onSuccess(ResponseInfo<File> responseInfo) {
+                File f = responseInfo.result;
+                if (f.length() > 0) {
                     Message message = mHandler.obtainMessage();
                     message.what = RELEASENOTEFILE;
                     Bundle bundle = new Bundle();
@@ -449,7 +421,12 @@ public class MainActivity extends Activity {
                     mHandler.sendMessage(message);
                 }
             }
-        }).start();
+
+            @Override
+            public void onFailure(HttpException e, String s) {
+                mHandler.sendEmptyMessage(ERRORNET);
+            }
+        });
     }
 
     private void updateVersion() {
@@ -468,11 +445,12 @@ public class MainActivity extends Activity {
     }
 
     private void downLoadMd5(final String url, final String path) {
-        new Thread(new Runnable() {
+        HttpUtils httpUtils = new HttpUtils();
+        HttpHandler<File> http = httpUtils.download(url, path, false, false, new RequestCallBack<File>() {
             @Override
-            public void run() {
-                mNetStr = OtaNetUtils.getNetStr(MainActivity.this, url);
-                if (mNetStr != null) {
+            public void onSuccess(ResponseInfo<File> responseInfo) {
+                File f = responseInfo.result;
+                if (f.length() > 0) {
                     Message message = mHandler.obtainMessage();
                     message.what = MD5FILE;
                     Bundle bundle = new Bundle();
@@ -482,7 +460,12 @@ public class MainActivity extends Activity {
                     mHandler.sendMessage(message);
                 }
             }
-        }).start();
+
+            @Override
+            public void onFailure(HttpException e, String s) {
+                mHandler.sendEmptyMessage(ERRORNET);
+            }
+        });
     }
 
     private void downLoadMd5File() {
@@ -496,7 +479,7 @@ public class MainActivity extends Activity {
 
     private void downLoadUpdateFile(final String url, final String path) {
         HttpUtils httpUtils = new HttpUtils();
-        http1 = httpUtils.download(url, path, true, false, new RequestCallBack<File>() {
+        HttpHandler<File> http = httpUtils.download(url, path, true, false, new RequestCallBack<File>() {
             @Override
             public void onStart() {
                 super.onStart();
