@@ -169,12 +169,10 @@ public class MainActivity extends Activity {
         mUpdateFile = new File(getDonwloadPath(), "update.zip");
         try {
             Process pro = Runtime.getRuntime().exec(
-                    new String[]{"su", "-c", "LD_LIBRARY_PATH=/system/gnupg/usr/lib HOME=/system/gnupg/home /system/gnupg/usr/bin/gpg -o " + mUpdateFile.getAbsolutePath().replace(getDonwloadPath(), "/sdcard/System_Os") + " -d " + mDownloadFile.getAbsolutePath().replace(getDonwloadPath(), "/sdcard/System_Os")});
-            Log.i("wwww", "LD_LIBRARY_PATH=/system/gnupg/usr/lib HOME=/system/gnupg/home /system/gnupg/usr/bin/gpg -o " + mUpdateFile.getAbsolutePath() + " -d " + mDownloadFile.getAbsolutePath());
+                    new String[]{"su", "-c", "HOME=/system/gnupg/home gpg -o " + mUpdateFile.getAbsolutePath().replace(getDonwloadPath(), "/sdcard/System_Os") + " -d " + mDownloadFile.getAbsolutePath().replace(getDonwloadPath(), "/sdcard/System_Os")});
             BufferedReader in = new BufferedReader(new InputStreamReader(pro.getInputStream()));
             String line = "";
             while ((line = in.readLine()) != null) {
-                Log.i("wwwww", line);
             }
         } catch (IOException e) {
             e.printStackTrace();
