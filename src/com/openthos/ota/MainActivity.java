@@ -1,5 +1,6 @@
 package com.openthos.ota;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -17,11 +18,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
-import android.view.Display;
-import android.view.Gravity;
-import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -40,24 +37,19 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import com.openthos.utis.OtaNetUtils;
 import com.openthos.utis.OtaReader;
-import com.openthos.utis.OtaMd5;
 
 public class MainActivity extends Activity {
     private File mOtaFile = null;
     private File mReleaseNoteFile = null;
     private File mDownloadFile = null;
-    private File mMd5File = null;
     private File mUpdateFile = null;
     private ProgressBar mProgressBar;
+    private ProgressDialog progressDialog;
     private SharedPreferences mSharedPreferences;
-    private SharedPreferences.Editor mEditor;
     private String CURRENT_VERSION = null;
     private ArrayList<String> alUpDate;
     private TextView mError;
@@ -69,38 +61,27 @@ public class MainActivity extends Activity {
     private RelativeLayout mUpdateNow;
     private RelativeLayout mUpdateIntroduce;
     private RelativeLayout mErrorlayout;
-    private RelativeLayout mManualUpdate;
 
     private Button mUpdateNowButton;
     private Button mUpdate_introduce;
     private Button mUpdateManualButton;
 
-    private final static int TIMER_CLOSING_PAGE_INTERVAL = 3000; // 3 second.
-    private final static int TIMER_CHECK_VERSION_INTERVAL = 3000; // 3second.
     private final static int OTAFILE = 0;
     private final static int RELEASENOTEFILE = 1;
-    private final static int MD5FILE = 2;
     private final static int ERRORNET = 3;
     private final static int ERRORNOTICE = 4;
     private final static int VERSION_LINE = 0;
     private final static int RELEASENOTE_LINE = 1;
     private final static int MD5FILENAME_LINE = 2;
     private final static int VALUE_COLUMN = 1;
-    private final static double DIALOG_WIDTH_FACTOR = 0.2;
-    private final static double DIALOG_HEIGHT_FACTOR = 0.5;
+    private String mPatch = "";
+    private int mPersist = 0;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        mSharedPreferences = getSharedPreferences("update", MODE_PRIVATE);
-        mEditor = mSharedPreferences.edit();
-        mEditor.putBoolean("default", true);
-        mEditor.commit();
         setContentView(R.layout.activity_main);
-        Window window = getWindow();
-        WindowManager.LayoutParams layoutParams = window.getAttributes();
-        window.setAttributes(layoutParams);
-        float density = getResources().getDisplayMetrics().density;
+
         initView();
         setListen();
         initData();
@@ -109,11 +90,6 @@ public class MainActivity extends Activity {
     private Handler mHandler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(Message msg) {
-            String path = "";
-            Bundle data = msg.getData();
-            if (data != null) {
-                path = data.getString("path");
-            }
             switch (msg.what) {
                 case OTAFILE:
                     downLoadOtaFile();
@@ -139,43 +115,51 @@ public class MainActivity extends Activity {
                         ad.show();
                     }
                     break;
-                case MD5FILE:
-                    downLoadMd5File();
-                    break;
                 case ERRORNET:
                     mErrorlayout.setVisibility(View.VISIBLE);
                     mError.setText(getResources().getString(R.string.errorNet));
                     mCurrentVersion.setVisibility(View.VISIBLE);
-                    CurrentVersion();
+                    getCurrentVersion();
                     mcurrent.setText(CURRENT_VERSION);
                     break;
                 case ERRORNOTICE:
                     mUpdateNow.setVisibility(View.GONE);
                     mUpdateIntroduce.setVisibility(View.GONE);
                     mCurrentVersion.setVisibility(View.VISIBLE);
-                    CurrentVersion();
+                    getCurrentVersion();
                     mcurrent.setText(CURRENT_VERSION);
                     mErrorlayout.setVisibility(View.VISIBLE);
                     mError.setText(getResources().getString(R.string.errornotice));
-                    break;
-                default:
                     break;
             }
             return false;
         }
     });
 
-    private boolean checkFile() {
+    private boolean checkFile(File f) {
         mUpdateFile = new File(getDonwloadPath(), "update.zip");
+        String result = "";
         try {
             Process pro = Runtime.getRuntime().exec(
-                    new String[]{"su", "-c", "HOME=/system/gnupg/home gpg -o " + mUpdateFile.getAbsolutePath().replace(getDonwloadPath(), "/sdcard/System_Os") + " -d " + mDownloadFile.getAbsolutePath().replace(getDonwloadPath(), "/sdcard/System_Os")});
+                    new String[]{"su", "-c", "HOME=/system/gnupg/home gpg -o "
+                            + mUpdateFile.getAbsolutePath().replace(getDonwloadPath(), "/sdcard/System_Os")
+                            + " -d " + mDownloadFile.getAbsolutePath().replace(getDonwloadPath(), "/sdcard/System_Os")
+                            + " ; echo $?"});
             BufferedReader in = new BufferedReader(new InputStreamReader(pro.getInputStream()));
             String line = "";
             while ((line = in.readLine()) != null) {
+                result = line;
             }
         } catch (IOException e) {
             e.printStackTrace();
+        }
+        try {
+            int code = Integer.parseInt(result);
+            if (code != 0 ) {
+                return false;
+            }
+        } catch (NumberFormatException e){
+            return false;
         }
         if (mUpdateFile.length() > 0) {
             return true;
@@ -184,8 +168,7 @@ public class MainActivity extends Activity {
         }
     }
 
-
-    private String CurrentVersion() {
+    private String getCurrentVersion() {
         String path = "/system/version";
         if (new File(path).exists()) {
             String[] data = OtaReader.getFileDes(new File(path)).split("\n");
@@ -212,7 +195,6 @@ public class MainActivity extends Activity {
         mUpdateNow = (RelativeLayout) findViewById(R.id.updateNow);
         mUpdateIntroduce = (RelativeLayout) findViewById(R.id.updateIntroduce);
         mUpdateNowButton = (Button) findViewById(R.id.updateNowButton);
-        mManualUpdate = (RelativeLayout) findViewById(R.id.manual_update);
         mUpdateManualButton = (Button) findViewById(R.id.update_manual);
 
         mShowHaveUpdate = (RelativeLayout) findViewById(R.id.showHaveUpdate);
@@ -221,26 +203,11 @@ public class MainActivity extends Activity {
         mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
     }
 
-    private void initDialog(AlertDialog ad) {
-        WindowManager windowManager = getWindowManager();
-        Display display = windowManager.getDefaultDisplay();
-        WindowManager.LayoutParams params = ad.getWindow().getAttributes();
-        params.width = (int) (display.getWidth() * DIALOG_WIDTH_FACTOR);
-        params.height = (int) (display.getHeight() * DIALOG_HEIGHT_FACTOR);
-        params.gravity = Gravity.CENTER;
-        ad.getWindow().setGravity(Gravity.CENTER_HORIZONTAL |
-                Gravity.CENTER_VERTICAL);
-        ad.onWindowAttributesChanged(params);
-        ad.getWindow().setAttributes(params);
-    }
-
     private void downLoadnewVersion(final String url, final String path) {
-        HttpUtils httpUtils = new HttpUtils();
-        HttpHandler<File> http = httpUtils.download(url, path, false, false, new RequestCallBack<File>() {
+        new HttpUtils().download(url, path, false, false, new RequestCallBack<File>() {
             @Override
             public void onSuccess(ResponseInfo<File> responseInfo) {
                 File f = responseInfo.result;
-                Log.i("wwww", f.length() + "");
                 if (f.length() > 0) {
                     Message message = mHandler.obtainMessage();
                     message.what = OTAFILE;
@@ -267,7 +234,7 @@ public class MainActivity extends Activity {
             String str = alUpDate.get(VERSION_LINE);
             String[] strings = str.split("=");
             String version = strings[VALUE_COLUMN];
-            CurrentVersion();
+            getCurrentVersion();
             try {
                 String currentversion = CURRENT_VERSION.replace(".", "");
                 String newversion = version.replace(".", "");
@@ -319,17 +286,66 @@ public class MainActivity extends Activity {
         if (data != null) {
             String filePath = data.getData().getEncodedPath();
             File f = new File(filePath);
-            if (!f.exists() || !filePath.endsWith(".zip")) {
+            if (!f.exists()) {
                 Toast.makeText(this, getString(R.string.check_error), Toast.LENGTH_SHORT).show();
                 return;
+            } else if (filePath.endsWith(".gpg")) {
+                checkUpgradeGpgFile(f);
+            } else {
+                Toast.makeText(this, getString(R.string.check_error), Toast.LENGTH_SHORT).show();
             }
-            checkUpgradeFile(f);
         }
     }
 
-    ProgressDialog progressDialog;
+    private void checkUpgradeGpgFile(final File f) {
+        progressDialog = new ProgressDialog(MainActivity.this);
+        progressDialog.setMessage(getString(R.string.verify_package));
+        progressDialog.setCancelable(false);
+        progressDialog.show();
+        new Thread() {
+            @Override
+            public void run() {
+                super.run();
+                if (checkFile(f)) {
+                    String filePath = getDonwloadPath() + "/update";
+                    File upFile = new File(filePath);
+                    if (!upFile.exists()) {
+                        try {
+                            upFile.createNewFile();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    String updatename = mUpdateFile.getName();
+                    OtaReader.writeFile(upFile, updatename);
+                    MainActivity.this.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            progressDialog.dismiss();
+                            mShowHaveUpdate.setVisibility(View.GONE);
+                            showMyDialog();
+                        }
+                    });
+                } else {
+                    try {
+                        Runtime.getRuntime().exec(new String[]{"su", "-c", "rm -r /sdcard/System_Os"});
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    MainActivity.this.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            progressDialog.dismiss();
+                            Toast.makeText(MainActivity.this, getString(R.string.verify_error),
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+            }
+        }.start();
+    }
 
-    private void checkUpgradeFile(final File f) {
+    private void checkUpgradeZipFile(final File f) {
         progressDialog = new ProgressDialog(this);
         progressDialog.setMessage(getString(R.string.verify_package));
         progressDialog.setCancelable(false);
@@ -377,7 +393,7 @@ public class MainActivity extends Activity {
     }
 
     private void choiceToUpgrade(final File f) {
-        AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
         dialog.setMessage(getString(R.string.confrim_manual));
         dialog.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
             @Override
@@ -452,13 +468,6 @@ public class MainActivity extends Activity {
     }
 
     private void updateVersion() {
-//        String mMd5FileName = alUpDate.get(MD5FILENAME_LINE).split("=")[VALUE_COLUMN] + ".md5";
-//        String mMd5FilePath = getDonwloadPath() + "/" + mMd5FileName;
-//        mMd5File = new File(mMd5FilePath);
-//        if (mMd5File.exists()) {
-//            mMd5File.delete();
-//        }
-//        downLoadMd5(getDownloadUrl(mMd5FileName), mMd5FilePath);
         String mDownloadFileName = alUpDate.get(MD5FILENAME_LINE).split("=")[VALUE_COLUMN];
         String mDownloadFilePath = getDonwloadPath() + "/" + mDownloadFileName;
         Log.i("wwww", mDownloadFilePath);
@@ -473,42 +482,8 @@ public class MainActivity extends Activity {
         mUpdateIntroduce.setVisibility(View.GONE);
     }
 
-    private void downLoadMd5(final String url, final String path) {
-        HttpUtils httpUtils = new HttpUtils();
-        HttpHandler<File> http = httpUtils.download(url, path, false, false, new RequestCallBack<File>() {
-            @Override
-            public void onSuccess(ResponseInfo<File> responseInfo) {
-                File f = responseInfo.result;
-                if (f.length() > 0) {
-                    Message message = mHandler.obtainMessage();
-                    message.what = MD5FILE;
-                    Bundle bundle = new Bundle();
-                    bundle.putString("url", url);
-                    bundle.putString("path", path);
-                    message.setData(bundle);
-                    mHandler.sendMessage(message);
-                }
-            }
-
-            @Override
-            public void onFailure(HttpException e, String s) {
-                mHandler.sendEmptyMessage(ERRORNET);
-            }
-        });
-    }
-
-    private void downLoadMd5File() {
-        if (mMd5File.exists()) {
-            String mDownloadFileName = alUpDate.get(MD5FILENAME_LINE).split("=")[VALUE_COLUMN];
-            String mDownloadFilePath = getDonwloadPath() + "/" + mDownloadFileName;
-            mDownloadFile = new File(mDownloadFilePath);
-            downLoadUpdateFile(getDownloadUrl(mDownloadFileName), mDownloadFilePath);
-        }
-    }
-
     private void downLoadUpdateFile(final String url, final String path) {
-        HttpUtils httpUtils = new HttpUtils();
-        HttpHandler<File> http = httpUtils.download(url, path, true, false, new RequestCallBack<File>() {
+        new HttpUtils().download(url, path, true, false, new RequestCallBack<File>() {
             @Override
             public void onStart() {
                 super.onStart();
@@ -524,61 +499,7 @@ public class MainActivity extends Activity {
 
             @Override
             public void onSuccess(ResponseInfo<File> responseInfo) {
-//                if (mDownloadFile.exists()) {
-//                    String fileMD5 = OtaMd5.getFileMD5(mDownloadFile);
-//                    ArrayList<String> arr = OtaReader.getArraylist(mMd5File);
-//                    String[] checkMD5Info = arr.get(VERSION_LINE).split("=");
-//                    String checkMD5 = checkMD5Info[VALUE_COLUMN].trim();
-//                    if (fileMD5.equals(checkMD5)) {
-                //data/media/0/System_Os/update
-                progressDialog = new ProgressDialog(MainActivity.this);
-                progressDialog.setMessage(getString(R.string.verify_package));
-                progressDialog.setCancelable(false);
-                progressDialog.show();
-                new Thread() {
-                    @Override
-                    public void run() {
-                        super.run();
-                        if (checkFile()) {
-                            String filePath = getDonwloadPath() + "/update";
-                            File upFile = new File(filePath);
-                            if (!upFile.exists()) {
-                                try {
-                                    upFile.createNewFile();
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                            String updatename = mUpdateFile.getName();
-                            OtaReader.writeFile(upFile, updatename);
-                            MainActivity.this.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    progressDialog.dismiss();
-                                    mShowHaveUpdate.setVisibility(View.GONE);
-                                    showMyDialog(MainActivity.this);
-                                }
-                            });
-                        } else {
-                            MainActivity.this.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    progressDialog.dismiss();
-                                    Toast.makeText(MainActivity.this, getString(R.string.verify_error),
-                                            Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                        }
-                    }
-                }.start();
-
-//                    } else {
-//                        mShowHaveUpdate.setVisibility(View.GONE);
-//                        mOtaFile.delete();
-//                        mMd5File.delete();
-//                        mDownloadFile.delete();
-//                    }
-//                }
+                checkUpgradeGpgFile(mDownloadFile);
             }
 
             @Override
@@ -590,7 +511,6 @@ public class MainActivity extends Activity {
         });
     }
 
-    //http://192.168.0.180/openthos/oto_ota.ver
     private String getDownloadUrl(String url) {
         String unDefaultUpgradeUrl = Settings.Global.getString(getContentResolver(),
                                             Settings.Global.SYS_UPGRADE_URL);
@@ -601,27 +521,20 @@ public class MainActivity extends Activity {
         return defaultChecked ? defaultUpgradeUrl + url : unDefaultUpgradeUrl + url;
     }
 
+    @SuppressLint("WrongConstant")
     private String getDonwloadPath() {
-        mSharedPreferences = OtaApp.getContext().getSharedPreferences("update",
-                OtaApp.getContext().MODE_WORLD_WRITEABLE |
-                        OtaApp.getContext().MODE_APPEND |
-                        OtaApp.getContext().MODE_WORLD_READABLE);
-        Boolean check = mSharedPreferences.getBoolean("default", false);
-        if (check) {
-            if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-                return Environment.getExternalStorageDirectory().getPath()
-                        + File.separator + "System_Os";
-            } else {
-                return getFilesDir().getAbsolutePath();
-            }
+        mSharedPreferences = getSharedPreferences("update",
+                MODE_WORLD_WRITEABLE | MODE_APPEND | MODE_WORLD_READABLE);
+        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+            return Environment.getExternalStorageDirectory().getPath()
+                    + File.separator + "System_Os";
         } else {
-            String path = mSharedPreferences.getString("path", "");
-            return path;
+            return getFilesDir().getAbsolutePath();
         }
     }
 
-    public void showMyDialog(Context context) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+    public void showMyDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(getResources().getString(R.string.downloadsucessdate))
                 .setMessage(getResources().getString(R.string.downloadsucess))
                 .setPositiveButton(getResources().getString(R.string.install),
@@ -645,11 +558,10 @@ public class MainActivity extends Activity {
         ad.setCanceledOnTouchOutside(false);
         ad.setCancelable(false);
         ad.show();
-        //initDialog(ad);
     }
 
     public void showMyDialogBySelf() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(getResources().getString(R.string.downloadsucessdate))
                 .setMessage(getResources().getString(R.string.downloadsucess))
                 .setPositiveButton(getResources().getString(R.string.install),
@@ -673,6 +585,5 @@ public class MainActivity extends Activity {
         ad.setCanceledOnTouchOutside(false);
         ad.setCancelable(false);
         ad.show();
-        //initDialog(ad);
     }
 }
