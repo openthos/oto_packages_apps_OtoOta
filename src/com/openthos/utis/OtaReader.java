@@ -34,7 +34,7 @@ public class OtaReader {
     public static String getFileDes(File file) {
         BufferedReader reader = null;
         String str = null;
-        String content = null;
+        String content = "";
         try {
             InputStreamReader read = new InputStreamReader(new FileInputStream(file), "UTF-8");
             mBr = new BufferedReader(new FileReader(file));
