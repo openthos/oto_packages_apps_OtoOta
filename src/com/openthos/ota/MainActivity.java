@@ -142,8 +142,8 @@ public class MainActivity extends Activity {
         try {
             Process pro = Runtime.getRuntime().exec(
                     new String[]{"su", "-c", "HOME=/system/gnupg/home gpg -o "
-                            + mUpdateFile.getAbsolutePath().replace(getDonwloadPath(), "/sdcard/System_Os")
-                            + " -d " + mDownloadFile.getAbsolutePath().replace(getDonwloadPath(), "/sdcard/System_Os")
+                            + mUpdateFile.getAbsolutePath().replace(Environment.getExternalStorageDirectory().getPath(), "/sdcard")
+                            + " -d " + f.getAbsolutePath().replace(Environment.getExternalStorageDirectory().getPath(), "/sdcard")
                             + " ; echo $?"});
             BufferedReader in = new BufferedReader(new InputStreamReader(pro.getInputStream()));
             String line = "";
