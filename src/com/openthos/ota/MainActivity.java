@@ -74,17 +74,40 @@ public class MainActivity extends Activity {
     private final static int RELEASENOTE_LINE = 1;
     private final static int MD5FILENAME_LINE = 2;
     private final static int VALUE_COLUMN = 1;
-    private String mPatch = "";
-    private int mPersist = 0;
+    private boolean mIsRelease = true;
+    private String mSuffix = "user/";
+
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
-
+        if (checkBate()) {
+            ((TextView) findViewById(R.id.shownewversion)).setText(
+                    getString(R.string.openthos_new_version_develop));
+        }
         initView();
         setListen();
         initData();
+    }
+
+    private boolean checkBate() {
+        try {
+            Process pro = Runtime.getRuntime().exec(
+                    new String[]{"su", "-c", "HOME=/system/gnupg/home gpg --list-keys"});
+            BufferedReader in = new BufferedReader(new InputStreamReader(pro.getInputStream()));
+            String line = "";
+            while ((line = in.readLine()) != null) {
+                if (line.contains("Openthos Test")){
+                    mIsRelease = false;
+                    mSuffix = "dev/";
+                    return true;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     private Handler mHandler = new Handler(new Handler.Callback() {
@@ -155,10 +178,10 @@ public class MainActivity extends Activity {
         }
         try {
             int code = Integer.parseInt(result);
-            if (code != 0 ) {
+            if (code != 0) {
                 return false;
             }
-        } catch (NumberFormatException e){
+        } catch (NumberFormatException e) {
             return false;
         }
         if (mUpdateFile.length() > 0) {
@@ -518,7 +541,7 @@ public class MainActivity extends Activity {
                                             Settings.Global.SYS_UPGRADE_DEFAULT_URL);
         boolean defaultChecked = Settings.Global.getBoolean(getContentResolver(),
                                             Settings.Global.SYS_UPGRADE_DEFAULT, true);
-        return defaultChecked ? defaultUpgradeUrl + url : unDefaultUpgradeUrl + url;
+        return defaultChecked ? defaultUpgradeUrl + mSuffix + url : unDefaultUpgradeUrl + url;
     }
 
     @SuppressLint("WrongConstant")

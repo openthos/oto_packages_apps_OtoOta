@@ -85,7 +85,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/marginstandardtop"
-            android:text="@string/openthos_new_version"
+            android:text="@string/openthos_new_version_release"
             android:textSize="20sp"/>
 
         <TextView
