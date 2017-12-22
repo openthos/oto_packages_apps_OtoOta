@@ -14,6 +14,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.PowerManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -23,7 +24,6 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.provider.Settings;
 
 import com.lidroid.xutils.HttpUtils;
 import com.lidroid.xutils.http.HttpHandler;
@@ -49,7 +49,6 @@ public class MainActivity extends Activity {
     private File mUpdateFile = null;
     private ProgressBar mProgressBar;
     private ProgressDialog progressDialog;
-    private SharedPreferences mSharedPreferences;
     private String CURRENT_VERSION = null;
     private ArrayList<String> alUpDate;
     private TextView mError;
@@ -74,9 +73,8 @@ public class MainActivity extends Activity {
     private final static int RELEASENOTE_LINE = 1;
     private final static int MD5FILENAME_LINE = 2;
     private final static int VALUE_COLUMN = 1;
-    private boolean mIsRelease = true;
     private String mSuffix = "user/";
-
+    private String mBasePath = "";
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -85,6 +83,11 @@ public class MainActivity extends Activity {
         if (checkBate()) {
             ((TextView) findViewById(R.id.shownewversion)).setText(
                     getString(R.string.openthos_new_version_develop));
+        }
+        mBasePath = getSharedPreferences("OTA", Context.MODE_PRIVATE).getString("DownloadUrl", "");
+        if (TextUtils.isEmpty(mBasePath)) {
+            mBasePath = "https://mirrors.tuna.tsinghua.edu.cn/openthos/OTA/";
+            getSharedPreferences("OTA", Context.MODE_PRIVATE).edit().putString("DownloadUrl", mBasePath).commit();
         }
         initView();
         setListen();
@@ -98,8 +101,7 @@ public class MainActivity extends Activity {
             BufferedReader in = new BufferedReader(new InputStreamReader(pro.getInputStream()));
             String line = "";
             while ((line = in.readLine()) != null) {
-                if (line.contains("Openthos Test")){
-                    mIsRelease = false;
+                if (line.contains("Openthos Test")) {
                     mSuffix = "dev/";
                     return true;
                 }
@@ -535,19 +537,11 @@ public class MainActivity extends Activity {
     }
 
     private String getDownloadUrl(String url) {
-        String unDefaultUpgradeUrl = Settings.Global.getString(getContentResolver(),
-                                            Settings.Global.SYS_UPGRADE_URL);
-        String defaultUpgradeUrl = Settings.Global.getString(getContentResolver(),
-                                            Settings.Global.SYS_UPGRADE_DEFAULT_URL);
-        boolean defaultChecked = Settings.Global.getBoolean(getContentResolver(),
-                                            Settings.Global.SYS_UPGRADE_DEFAULT, true);
-        return defaultChecked ? defaultUpgradeUrl + mSuffix + url : unDefaultUpgradeUrl + url;
+        return mBasePath + mSuffix + url;
     }
 
     @SuppressLint("WrongConstant")
     private String getDonwloadPath() {
-        mSharedPreferences = getSharedPreferences("update",
-                MODE_WORLD_WRITEABLE | MODE_APPEND | MODE_WORLD_READABLE);
         if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
             return Environment.getExternalStorageDirectory().getPath()
                     + File.separator + "System_Os";
