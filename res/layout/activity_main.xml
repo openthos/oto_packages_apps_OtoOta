@@ -1,5 +1,4 @@
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -9,28 +8,16 @@
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="@dimen/maxheight">
-
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:adjustViewBounds="true"
-            android:background="@drawable/oto_ota_background"/>
+        android:layout_height="@dimen/maxheight"
+        android:background="@drawable/oto_ota_background">
 
         <TextView
+            android:id="@+id/openthos"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginTop="@dimen/maxmargintop"
-            android:text="@string/otui1"
-            android:textSize="20sp"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="@string/otui"
-            android:textSize="20sp"/>
+            android:text="@string/otui_release"
+            android:textSize="20sp" />
     </FrameLayout>
 
     <RelativeLayout
@@ -46,7 +33,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/marginstandardtop"
             android:text="@string/current_version"
-            android:textSize="20sp"/>
+            android:textSize="20sp" />
 
         <TextView
             android:id="@+id/current_version"
@@ -54,7 +41,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/marginstandardtop"
             android:layout_toRightOf="@+id/The_current_version"
-            android:textSize="20sp"/>
+            android:textSize="20sp" />
     </RelativeLayout>
 
     <RelativeLayout
@@ -70,7 +57,7 @@
             android:layout_centerHorizontal="true"
             android:gravity="center"
             android:text="@string/manual_update"
-            android:textSize="15sp"/>
+            android:textSize="15sp" />
     </RelativeLayout>
 
     <RelativeLayout
@@ -86,7 +73,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/marginstandardtop"
             android:text="@string/openthos_new_version_release"
-            android:textSize="20sp"/>
+            android:textSize="20sp" />
 
         <TextView
             android:id="@+id/newversion"
@@ -94,7 +81,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/marginstandardtop"
             android:layout_toRightOf="@+id/shownewversion"
-            android:textSize="20sp"/>
+            android:textSize="20sp" />
     </RelativeLayout>
 
     <RelativeLayout
@@ -110,7 +97,7 @@
             android:layout_centerHorizontal="true"
             android:gravity="center"
             android:text="@string/updatenow"
-            android:textSize="15sp"/>
+            android:textSize="15sp" />
     </RelativeLayout>
 
     <RelativeLayout
@@ -126,7 +113,7 @@
             android:layout_centerHorizontal="true"
             android:gravity="center"
             android:text="@string/introduce"
-            android:textSize="15sp"/>
+            android:textSize="15sp" />
     </RelativeLayout>
 
     <RelativeLayout
@@ -143,14 +130,14 @@
             android:layout_centerHorizontal="true"
             android:gravity="center"
             android:text="@string/error"
-            android:textSize="20sp"/>
+            android:textSize="20sp" />
     </RelativeLayout>
 
     <RelativeLayout
         android:id="@+id/showHaveUpdate"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:visibility="gone" >
+        android:visibility="gone">
 
         <TextView
             android:id="@+id/tv"
@@ -159,7 +146,7 @@
             android:layout_centerInParent="true"
             android:gravity="center"
             android:text="@string/loading_openthos_newversion"
-            android:textSize="20sp"/>
+            android:textSize="20sp" />
 
         <com.openthos.utis.OtaProgressBar
             android:id="@+id/progressBar"
@@ -172,8 +159,7 @@
             android:layout_marginRight="@dimen/marginstandardright"
             android:layout_marginTop="@dimen/margin"
             android:max="100"
-            android:progress="0"
-            />
+            android:progress="0" />
     </RelativeLayout>
 
 </LinearLayout>

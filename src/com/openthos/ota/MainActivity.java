@@ -83,6 +83,8 @@ public class MainActivity extends Activity {
         if (checkBate()) {
             ((TextView) findViewById(R.id.shownewversion)).setText(
                     getString(R.string.openthos_new_version_develop));
+            ((TextView) findViewById(R.id.openthos)).setText(
+                    getString(R.string.otui_develop));
         }
         mBasePath = getSharedPreferences("OTA", Context.MODE_PRIVATE).getString("DownloadUrl", "");
         if (TextUtils.isEmpty(mBasePath)) {

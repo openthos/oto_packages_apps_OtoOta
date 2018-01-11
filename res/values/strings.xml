@@ -10,9 +10,8 @@
     <string name="confirm">Confirm</string>
     <string name="introduce">Release notes</string>
     <string name="updatenow">Update now</string>
-    <string name="otui">Openthos</string>
-    <string name="otui1">A good desktop operating system</string>
-    <string name="openthosbeta1.8.7_str"></string>
+    <string name="otui_release">OPENTHOS RELEASE</string>
+    <string name="otui_develop">OPENTHOS DEVELOP</string>
     <string name="openthos_new_version_release">Discover new Release version</string>
     <string name="openthos_new_version_develop">Discover new Develop version</string>
     <string name="loading_openthos_newversion">Downloading the new version\nDo not shut down or unplug the power before the upgrade is complete</string>
