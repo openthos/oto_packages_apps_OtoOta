@@ -35,4 +35,7 @@
     <string name="check_error">选择的文件不是一个GPG格式的升级包</string>
     <string name="verify_error">校验升级包失败，请重新选择或下载升级包</string>
     <string name="init_upgrade">准备升级环境</string>
+    <string name="multichoice_dialog_title">请选择要卸载的过期系统应用</string>
+    <string name="multichoice_dialog_confirm">确认</string>
+    <string name="multichoice_dialog_cancel">取消</string>
 </resources>

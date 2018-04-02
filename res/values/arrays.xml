@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="deprecated_system_app_list">
+        <item>org.mozilla.fennec_root</item>
+        <item>jackpal.androidterm</item>
+    </string-array>
+</resources>

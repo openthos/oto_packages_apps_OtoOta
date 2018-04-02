@@ -345,6 +345,9 @@ public class MainActivity extends Activity {
                     }
                     String updatename = mUpdateFile.getName();
                     OtaReader.writeFile(upFile, updatename);
+                    SharedPreferences sp = getSharedPreferences(
+                            "systemUpgradeInfo", Context.MODE_PRIVATE);
+                    sp.edit().putBoolean("isUpgrade", true).commit();
                     MainActivity.this.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
