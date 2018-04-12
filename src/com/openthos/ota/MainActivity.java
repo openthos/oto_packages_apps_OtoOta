@@ -9,27 +9,31 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.PowerManager;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.lidroid.xutils.HttpUtils;
-import com.lidroid.xutils.http.HttpHandler;
 import com.lidroid.xutils.exception.HttpException;
+import com.lidroid.xutils.http.HttpHandler;
 import com.lidroid.xutils.http.ResponseInfo;
 import com.lidroid.xutils.http.callback.RequestCallBack;
+import com.openthos.utis.OtaReader;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -39,8 +43,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-
-import com.openthos.utis.OtaReader;
 
 public class MainActivity extends Activity {
     private File mOtaFile = null;
@@ -60,10 +62,10 @@ public class MainActivity extends Activity {
     private RelativeLayout mUpdateNow;
     private RelativeLayout mUpdateIntroduce;
     private RelativeLayout mErrorlayout;
+    private View mSettings;
 
     private Button mUpdateNowButton;
     private Button mUpdate_introduce;
-    private Button mUpdateManualButton;
 
     private final static int OTAFILE = 0;
     private final static int RELEASENOTEFILE = 1;
@@ -75,6 +77,8 @@ public class MainActivity extends Activity {
     private final static int VALUE_COLUMN = 1;
     private String mSuffix = "user/";
     private String mBasePath = "";
+
+    private AlertDialog mOption;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -222,12 +226,12 @@ public class MainActivity extends Activity {
         mUpdateNow = (RelativeLayout) findViewById(R.id.updateNow);
         mUpdateIntroduce = (RelativeLayout) findViewById(R.id.updateIntroduce);
         mUpdateNowButton = (Button) findViewById(R.id.updateNowButton);
-        mUpdateManualButton = (Button) findViewById(R.id.update_manual);
 
         mShowHaveUpdate = (RelativeLayout) findViewById(R.id.showHaveUpdate);
         mCurrentVersion = (RelativeLayout) findViewById(R.id.currentVersion);
         mErrorlayout = (RelativeLayout) findViewById(R.id.errorlayout);
         mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
+        mSettings = findViewById(R.id.setting);
     }
 
     private void downLoadnewVersion(final String url, final String path) {
@@ -295,13 +299,78 @@ public class MainActivity extends Activity {
                 updateVersion();
             }
         });
-        mUpdateManualButton.setOnClickListener(new OnClickListener() {
+
+
+        mSettings.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent();
-                intent.setComponent(new ComponentName("com.openthos.filemanager",
-                        "com.openthos.filemanager.PickerActivity"));
-                startActivityForResult(intent, 000);
+                if (mOption == null) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                    builder.setTitle(getString(R.string.option));
+                    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.WRAP_CONTENT, 0);
+                    LinearLayout linearLayout = new LinearLayout(MainActivity.this);
+                    linearLayout.setLayoutParams(params);
+                    linearLayout.setOrientation(LinearLayout.VERTICAL);
+                    final CheckBox tips = new CheckBox(MainActivity.this);
+                    tips.setLayoutParams(params);
+                    tips.setFocusable(false);
+                    tips.setClickable(true);
+                    tips.setEnabled(true);
+                    tips.setText(getString(R.string.new_version_reminder));
+                    tips.setPadding(10, 10, 10, 10);
+                    tips.setChecked(OtaApp.getSharedPreferences(MainActivity.this)
+                            .getBoolean(OtaApp.TIPS, false));
+                    linearLayout.addView(tips);
+                    final CheckBox auto = new CheckBox(MainActivity.this);
+                    auto.setLayoutParams(params);
+                    auto.setFocusable(false);
+                    auto.setClickable(true);
+                    auto.setEnabled(true);
+                    auto.setText(getString(R.string.auto_update));
+                    auto.setTextColor(Color.BLACK);
+                    auto.setPadding(10, 10, 10, 10);
+                    auto.setChecked(OtaApp.getSharedPreferences(MainActivity.this)
+                            .getBoolean(OtaApp.AUTO, false));
+                    CheckBox manualUpdate = new CheckBox(MainActivity.this);
+                    manualUpdate.setText(R.string.manual_update);
+                    manualUpdate.setButtonDrawable(null);
+                    manualUpdate.setPadding(10, 10, 10, 10);
+                    manualUpdate.setOnClickListener(new OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            mOption.dismiss();
+                            Intent intent = new Intent();
+                            intent.setComponent(new ComponentName("com.openthos.filemanager",
+                                    "com.openthos.filemanager.PickerActivity"));
+                            startActivityForResult(intent, 000);
+                        }
+                    });
+                    linearLayout.addView(manualUpdate);
+                    builder.setView(linearLayout);
+                    builder.setPositiveButton(getString(R.string.yes),
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                    OtaApp.getSharedPreferences(MainActivity.this).edit()
+                                            .putBoolean(OtaApp.TIPS, tips.isChecked()).commit();
+                                    OtaApp.getSharedPreferences(MainActivity.this).edit()
+                                            .putBoolean(OtaApp.AUTO, auto.isChecked()).commit();
+                                    OtaApp.startAutoUpdate(MainActivity.this, tips.isChecked());
+                                }
+                    });
+                    builder.setNegativeButton(getString(R.string.no),
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                }
+                    });
+                    mOption = builder.create();
+                }
+                mOption.show();
             }
         });
 
@@ -500,8 +569,6 @@ public class MainActivity extends Activity {
     private void updateVersion() {
         String mDownloadFileName = alUpDate.get(MD5FILENAME_LINE).split("=")[VALUE_COLUMN];
         String mDownloadFilePath = getDonwloadPath() + "/" + mDownloadFileName;
-        Log.i("wwww", mDownloadFilePath);
-        Log.i("wwww", mDownloadFileName);
 
         mDownloadFile = new File(mDownloadFilePath);
         downLoadUpdateFile(getDownloadUrl(mDownloadFileName), mDownloadFilePath);

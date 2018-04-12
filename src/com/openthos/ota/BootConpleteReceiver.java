@@ -1,40 +1,34 @@
 package com.openthos.ota;
 
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
-import android.content.SharedPreferences;
 import android.content.DialogInterface;
-
-import android.app.AlertDialog;
-
-import android.view.Gravity;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.ImageView;
-
-import android.graphics.drawable.Drawable;
-import android.graphics.Color;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
-public class UninstallSystemAppsReceiver extends BroadcastReceiver {
+public class BootConpleteReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(final Context context, Intent intent) {
@@ -43,7 +37,7 @@ public class UninstallSystemAppsReceiver extends BroadcastReceiver {
         if (sp.getBoolean("isUpgrade", false)) {
             final String[] oldAppInfos = context.getResources()
                     .getStringArray(R.array.deprecated_system_app_list);
-            final List<SystemAppInfo> systemAppInfoList = new ArrayList<SystemAppInfo> ();
+            final List<SystemAppInfo> systemAppInfoList = new ArrayList<SystemAppInfo>();
             PackageManager pm = context.getPackageManager();
             String packageName = null;
             String appName = null;
@@ -102,10 +96,10 @@ public class UninstallSystemAppsReceiver extends BroadcastReceiver {
                                         BufferedReader in = null;
                                         try {
                                             Process pro = Runtime.getRuntime().exec(
-                                                new String[]{"su", "-c",
-                                                    "pm uninstall --user 0 " + packageName});
+                                                    new String[]{"su", "-c",
+                                                            "pm uninstall --user 0 " + packageName});
                                             in = new BufferedReader(
-                                                new InputStreamReader(pro.getInputStream()));
+                                                    new InputStreamReader(pro.getInputStream()));
                                             String line;
                                             while ((line = in.readLine()) != null) {
                                             }
@@ -126,16 +120,16 @@ public class UninstallSystemAppsReceiver extends BroadcastReceiver {
                                     }
                                 }
                             }
-                });
+                        });
 
                 builder.setNegativeButton(
                         context.getResources().getString(R.string.multichoice_dialog_cancel),
                         new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
                 builder.setCancelable(false);
                 AlertDialog dialog = builder.create();
                 dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
@@ -143,19 +137,20 @@ public class UninstallSystemAppsReceiver extends BroadcastReceiver {
                 sp.edit().putBoolean("isUpgrade", false).commit();
             }
         }
+        OtaApp.startAutoUpdate(context,
+                OtaApp.getSharedPreferences(context).getBoolean(OtaApp.TIPS, false));
     }
 
     private boolean checkAppIsExists(Context context, String packageName) {
-       if (packageName == null || "".equals(packageName))
-           return false;
-
-       try {
-           context.getPackageManager().getApplicationInfo(
-                   packageName, PackageManager.GET_UNINSTALLED_PACKAGES);
-           return true;
-       } catch (PackageManager.NameNotFoundException e) {
-           return false;
-       }
+        if (packageName == null || "".equals(packageName))
+            return false;
+        try {
+            context.getPackageManager().getApplicationInfo(
+                    packageName, PackageManager.GET_UNINSTALLED_PACKAGES);
+            return true;
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
     }
 
     private class SystemAppInfo {

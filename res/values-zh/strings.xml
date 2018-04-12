@@ -38,4 +38,8 @@
     <string name="multichoice_dialog_title">请选择要卸载的过期系统应用</string>
     <string name="multichoice_dialog_confirm">确认</string>
     <string name="multichoice_dialog_cancel">取消</string>
+    <string name="disconvery_new_version">发现新版本</string>
+    <string name="option">选项</string>
+    <string name="new_version_reminder">新版本提醒</string>
+    <string name="auto_update">自动升级</string>
 </resources>

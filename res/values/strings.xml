@@ -37,4 +37,8 @@
     <string name="multichoice_dialog_title">Please select deprecated system apps who will be uninstalled</string>
     <string name="multichoice_dialog_confirm">Confirm</string>
     <string name="multichoice_dialog_cancel">Cancel</string>
+    <string name="disconvery_new_version">Disconvery new version</string>
+    <string name="option">Option</string>
+    <string name="new_version_reminder">New version reminder</string>
+    <string name="auto_update">Auto Update</string>
 </resources>

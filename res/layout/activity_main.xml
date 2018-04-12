@@ -11,6 +11,15 @@
         android:layout_height="@dimen/maxheight"
         android:background="@drawable/oto_ota_background">
 
+        <Button
+            android:id="@+id/setting"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:background="@null"
+            android:padding="20dp"
+            android:text="@string/option" />
+
         <TextView
             android:id="@+id/openthos"
             android:layout_width="wrap_content"
@@ -42,22 +51,6 @@
             android:layout_marginTop="@dimen/marginstandardtop"
             android:layout_toRightOf="@+id/The_current_version"
             android:textSize="20sp" />
-    </RelativeLayout>
-
-    <RelativeLayout
-        android:id="@+id/manual_update"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="visible">
-
-        <Button
-            android:id="@+id/update_manual"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:gravity="center"
-            android:text="@string/manual_update"
-            android:textSize="15sp" />
     </RelativeLayout>
 
     <RelativeLayout
