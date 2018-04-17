@@ -78,7 +78,7 @@ public class AutoUpdateService extends Service {
         return Service.START_STICKY_COMPATIBILITY;
     }
 
-    private void shouNotification(String version) {
+    private void showNotification(String version) {
         Bitmap btm = BitmapFactory.decodeResource(getResources(),
                 R.drawable.otaoto);
         Intent resultIntent = new Intent(this, MainActivity.class);
@@ -89,6 +89,8 @@ public class AutoUpdateService extends Service {
                 .setContentText(getString(R.string.disconvery_new_version) + version)
                 .setTicker(getString(R.string.disconvery_new_version))
                 .setLargeIcon(btm)
+                .setSmallIcon(R.drawable.otaoto)
+                .setNumber(0)
                 .setAutoCancel(true)
                 .setDefaults(DEFAULT_ALL)
                 .setPriority(Notification.PRIORITY_DEFAULT)
@@ -147,7 +149,7 @@ public class AutoUpdateService extends Service {
                 int cv = Integer.parseInt(currentversion);
                 int nv = Integer.parseInt(newversion);
                 if (nv > cv) {
-                    shouNotification(version);
+                    showNotification(version);
                 }
             } catch (Exception ex) {
                 ex.printStackTrace();
