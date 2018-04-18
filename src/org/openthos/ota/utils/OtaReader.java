@@ -1,4 +1,4 @@
-package com.openthos.utis;
+package org.openthos.ota.utils;
 
 import java.io.BufferedReader;
 import java.io.File;

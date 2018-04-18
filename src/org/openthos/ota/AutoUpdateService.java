@@ -1,4 +1,4 @@
-package com.openthos.ota;
+package org.openthos.ota;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -19,7 +19,7 @@ import com.lidroid.xutils.HttpUtils;
 import com.lidroid.xutils.exception.HttpException;
 import com.lidroid.xutils.http.ResponseInfo;
 import com.lidroid.xutils.http.callback.RequestCallBack;
-import com.openthos.utis.OtaReader;
+import org.openthos.ota.utils.OtaReader;
 
 import java.io.BufferedReader;
 import java.io.File;

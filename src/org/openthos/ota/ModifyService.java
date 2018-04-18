@@ -1,4 +1,4 @@
-package com.openthos.ota;
+package org.openthos.ota;
 
 import android.app.Service;
 import android.content.Context;

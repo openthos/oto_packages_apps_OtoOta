@@ -141,7 +141,7 @@
             android:text="@string/loading_openthos_newversion"
             android:textSize="20sp" />
 
-        <com.openthos.utis.OtaProgressBar
+        <org.openthos.ota.utils.OtaProgressBar
             android:id="@+id/progressBar"
             style="@android:style/Widget.ProgressBar.Horizontal"
             android:layout_width="match_parent"

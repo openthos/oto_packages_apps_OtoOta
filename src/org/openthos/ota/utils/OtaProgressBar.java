@@ -1,4 +1,4 @@
-package com.openthos.utis;
+package org.openthos.ota.utils;
 
 import android.content.Context;
 import android.graphics.Canvas;

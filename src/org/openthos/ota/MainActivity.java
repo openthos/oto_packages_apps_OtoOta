@@ -1,4 +1,4 @@
-package com.openthos.ota;
+package org.openthos.ota;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -33,7 +33,7 @@ import com.lidroid.xutils.exception.HttpException;
 import com.lidroid.xutils.http.HttpHandler;
 import com.lidroid.xutils.http.ResponseInfo;
 import com.lidroid.xutils.http.callback.RequestCallBack;
-import com.openthos.utis.OtaReader;
+import org.openthos.ota.utils.OtaReader;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -342,8 +342,8 @@ public class MainActivity extends Activity {
                         public void onClick(View v) {
                             mOption.dismiss();
                             Intent intent = new Intent();
-                            intent.setComponent(new ComponentName("com.openthos.filemanager",
-                                    "com.openthos.filemanager.PickerActivity"));
+                            intent.setComponent(new ComponentName("org.openthos.filemanager",
+                                    "org.openthos.filemanager.PickerActivity"));
                             startActivityForResult(intent, 000);
                         }
                     });

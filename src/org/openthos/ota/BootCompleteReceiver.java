@@ -1,4 +1,4 @@
-package com.openthos.ota;
+package org.openthos.ota;
 
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
