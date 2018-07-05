@@ -16,6 +16,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.PowerManager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -33,13 +34,18 @@ import com.lidroid.xutils.exception.HttpException;
 import com.lidroid.xutils.http.HttpHandler;
 import com.lidroid.xutils.http.ResponseInfo;
 import com.lidroid.xutils.http.callback.RequestCallBack;
+
+import org.openthos.ota.R;
 import org.openthos.ota.utils.OtaReader;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -79,11 +85,13 @@ public class MainActivity extends Activity {
     private String mBasePath = "";
 
     private AlertDialog mOption;
+    private File mVerity = new File(new File("/data/data", "org.openthos.ota"), "verity");
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
+        initEnvironment();
         if (checkBate()) {
             ((TextView) findViewById(R.id.shownewversion)).setText(
                     getString(R.string.openthos_new_version_develop));
@@ -98,6 +106,64 @@ public class MainActivity extends Activity {
         initView();
         setListen();
         initData();
+    }
+
+    private void initEnvironment() {
+        if (!mVerity.exists()) {
+            InputStream in = null;
+            OutputStream out = null;
+            try {
+                in = getAssets().open("verity");
+                out = new FileOutputStream(mVerity);
+                int byteconut;
+                byte[] bytes = new byte[1024];
+                while ((byteconut = in.read(bytes)) != -1) {
+                    out.write(bytes, 0, byteconut);
+                }
+                in.close();
+                out.close();
+                in = null;
+                out = null;
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (in != null) {
+                    try {
+                        in.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                if (out != null) {
+                    try {
+                        out.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+        BufferedReader br = null;
+        try {
+            Process pro = Runtime.getRuntime().exec(
+                    new String[]{"su", "-c", "chmod 777 " + mVerity.getAbsolutePath()});
+            br = new BufferedReader(new InputStreamReader(pro.getInputStream()));
+            String line = "";
+            while ((line = br.readLine()) != null) {
+            }
+            br.close();
+            br = null;
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (br != null) {
+                try {
+                    br.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     private boolean checkBate() {
@@ -167,6 +233,23 @@ public class MainActivity extends Activity {
         }
     });
 
+    private File checkSignFile(File f) {
+        File result = new File(f.getAbsolutePath().substring(0, f.getAbsolutePath().lastIndexOf(".")));
+        try {
+            Process pro = Runtime.getRuntime().exec(
+                    new String[]{"su", "-c", mVerity.getAbsolutePath() + " "
+                            + f.getAbsolutePath().replace(Environment.getExternalStorageDirectory().getPath(), "/sdcard")
+                            + " " + result.getAbsolutePath().replace(Environment.getExternalStorageDirectory().getPath(), "/sdcard")});
+            BufferedReader in = new BufferedReader(new InputStreamReader(pro.getInputStream()));
+            String line = "";
+            while ((line = in.readLine()) != null) {
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
     private boolean checkFile(File f) {
         mUpdateFile = new File(getDonwloadPath(), "update.zip");
         String result = "";
@@ -209,12 +292,12 @@ public class MainActivity extends Activity {
     }
 
     private void initData() {
-        String downloadPath = getDonwloadPath() + "/oto_ota.ver";
+        String downloadPath = getDonwloadPath() + "/oto_ota_sign.ver";
         mOtaFile = new File(downloadPath);
         if (mOtaFile.exists()) {
             mOtaFile.delete();
         }
-        downLoadnewVersion(getDownloadUrl("oto_ota.ver"), downloadPath);
+        downLoadnewVersion(getDownloadUrl("oto_ota_sign.ver"), downloadPath);
     }
 
     private void initView() {
@@ -360,14 +443,14 @@ public class MainActivity extends Activity {
                                             .putBoolean(OtaApp.AUTO, auto.isChecked()).commit();
                                     OtaApp.startAutoUpdate(MainActivity.this, tips.isChecked());
                                 }
-                    });
+                            });
                     builder.setNegativeButton(getString(R.string.no),
                             new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     dialog.dismiss();
                                 }
-                    });
+                            });
                     mOption = builder.create();
                 }
                 mOption.show();
@@ -385,12 +468,64 @@ public class MainActivity extends Activity {
             if (!f.exists()) {
                 Toast.makeText(this, getString(R.string.check_error), Toast.LENGTH_SHORT).show();
                 return;
-            } else if (filePath.endsWith(".gpg")) {
-                checkUpgradeGpgFile(f);
+            } else if (filePath.endsWith(".sign")) {
+                checkUpgradeSignFile(f);
             } else {
                 Toast.makeText(this, getString(R.string.check_error), Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+    private void checkUpgradeSignFile(final File f) {
+        progressDialog = new ProgressDialog(MainActivity.this);
+        progressDialog.setMessage(getString(R.string.verify_package));
+        progressDialog.setCancelable(false);
+        progressDialog.show();
+        new Thread() {
+            @Override
+            public void run() {
+                super.run();
+                File result = checkSignFile(f);
+                String filePath = getDonwloadPath() + "/update";
+                File upFile = new File(filePath);
+                if (!upFile.exists()) {
+                    try {
+                        upFile.createNewFile();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                String updatename = result.getName();
+                OtaReader.writeFile(upFile, updatename);
+                SharedPreferences sp = getSharedPreferences(
+                        "systemUpgradeInfo", Context.MODE_PRIVATE);
+                sp.edit().putBoolean("isUpgrade", true).commit();
+                MainActivity.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        progressDialog.dismiss();
+                        mShowHaveUpdate.setVisibility(View.GONE);
+                        showMyDialog();
+                    }
+                });
+            }
+        }.start();
+    }
+
+    private void updateError() {
+        try {
+            Runtime.getRuntime().exec(new String[]{"su", "-c", "rm -r /sdcard/System_Os"});
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        MainActivity.this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                progressDialog.dismiss();
+                Toast.makeText(MainActivity.this, getString(R.string.verify_error),
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void checkUpgradeGpgFile(final File f) {
@@ -426,19 +561,7 @@ public class MainActivity extends Activity {
                         }
                     });
                 } else {
-                    try {
-                        Runtime.getRuntime().exec(new String[]{"su", "-c", "rm -r /sdcard/System_Os"});
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    MainActivity.this.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            progressDialog.dismiss();
-                            Toast.makeText(MainActivity.this, getString(R.string.verify_error),
-                                    Toast.LENGTH_SHORT).show();
-                        }
-                    });
+                    updateError();
                 }
             }
         }.start();
@@ -596,14 +719,18 @@ public class MainActivity extends Activity {
 
             @Override
             public void onSuccess(ResponseInfo<File> responseInfo) {
-                checkUpgradeGpgFile(mDownloadFile);
+                checkUpgradeSignFile(mDownloadFile);
             }
 
             @Override
             public void onFailure(HttpException e, String s) {
                 mShowHaveUpdate.setVisibility(View.GONE);
                 mProgressBar.setVisibility(ProgressBar.INVISIBLE);
-                Toast.makeText(MainActivity.this, R.string.error, Toast.LENGTH_SHORT).show();
+                if (s.equals("maybe the file has downloaded completely")) {
+                    checkUpgradeSignFile(mDownloadFile);
+                } else {
+                    Toast.makeText(MainActivity.this, R.string.error, Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }

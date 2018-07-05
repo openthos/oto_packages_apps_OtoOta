@@ -31,7 +31,7 @@
     <string name="confrim_manual">Manual upgrade are risky and it may cause the system to not start properly! Whether to continue?</string>
     <string name="yes">YES</string>
     <string name="no">NO</string>
-    <string name="check_error">The selected file is not a GPG format upgrade package</string>
+    <string name="check_error">The selected file is not a SIGN format upgrade package</string>
     <string name="verify_error">Upgrade Package checksum failed, please select or download upgrade package again</string>
     <string name="init_upgrade">Preparing to upgrade the environment</string>
     <string name="multichoice_dialog_title">Please select deprecated system apps who will be uninstalled</string>
