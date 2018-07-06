@@ -233,13 +233,13 @@ public class MainActivity extends Activity {
         }
     });
 
-    private File checkSignFile(File f) {
-        File result = new File(f.getAbsolutePath().substring(0, f.getAbsolutePath().lastIndexOf(".")));
+    private void checkSignFile(File f) {
+        mUpdateFile = new File(getDonwloadPath(), "update.zip");
         try {
             Process pro = Runtime.getRuntime().exec(
                     new String[]{"su", "-c", mVerity.getAbsolutePath() + " "
                             + f.getAbsolutePath().replace(Environment.getExternalStorageDirectory().getPath(), "/sdcard")
-                            + " " + result.getAbsolutePath().replace(Environment.getExternalStorageDirectory().getPath(), "/sdcard")});
+                            + " " + mUpdateFile.getAbsolutePath().replace(Environment.getExternalStorageDirectory().getPath(), "/sdcard")});
             BufferedReader in = new BufferedReader(new InputStreamReader(pro.getInputStream()));
             String line = "";
             while ((line = in.readLine()) != null) {
@@ -247,7 +247,6 @@ public class MainActivity extends Activity {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return result;
     }
 
     private boolean checkFile(File f) {
@@ -485,7 +484,12 @@ public class MainActivity extends Activity {
             @Override
             public void run() {
                 super.run();
-                File result = checkSignFile(f);
+                checkSignFile(f);
+                File result = new File(mUpdateFile.getAbsolutePath());
+                if (!result.exists()) {
+                    updateError();
+                    return;
+                }
                 String filePath = getDonwloadPath() + "/update";
                 File upFile = new File(filePath);
                 if (!upFile.exists()) {
