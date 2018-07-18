@@ -109,6 +109,7 @@ public class MainActivity extends Activity {
     }
 
     private void initEnvironment() {
+        new File(getDonwloadPath()).mkdirs();
         if (!mVerity.exists()) {
             InputStream in = null;
             OutputStream out = null;
@@ -518,7 +519,7 @@ public class MainActivity extends Activity {
 
     private void updateError() {
         try {
-            Runtime.getRuntime().exec(new String[]{"su", "-c", "rm -r /sdcard/System_Os"});
+            Runtime.getRuntime().exec(new String[]{"su", "-c", "rm -r /sdcard/System_Os/*"});
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -743,14 +744,9 @@ public class MainActivity extends Activity {
         return mBasePath + mSuffix + url;
     }
 
-    @SuppressLint("WrongConstant")
     private String getDonwloadPath() {
-        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-            return Environment.getExternalStorageDirectory().getPath()
-                    + File.separator + "System_Os";
-        } else {
-            return getFilesDir().getAbsolutePath();
-        }
+        return Environment.getExternalStorageDirectory().getPath()
+                + File.separator + "System_Os";
     }
 
     public void showMyDialog() {
