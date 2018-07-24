@@ -468,8 +468,8 @@ public class MainActivity extends Activity {
             if (!f.exists()) {
                 Toast.makeText(this, getString(R.string.check_error), Toast.LENGTH_SHORT).show();
                 return;
-            } else if (filePath.endsWith(".sign")) {
-                checkUpgradeSignFile(f);
+            } else if (filePath.endsWith(".gpg")) {
+                checkUpgradeGpgFile(f);
             } else {
                 Toast.makeText(this, getString(R.string.check_error), Toast.LENGTH_SHORT).show();
             }
