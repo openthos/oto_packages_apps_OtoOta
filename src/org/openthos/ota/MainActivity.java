@@ -81,7 +81,7 @@ public class MainActivity extends Activity {
     private final static int RELEASENOTE_LINE = 1;
     private final static int MD5FILENAME_LINE = 2;
     private final static int VALUE_COLUMN = 1;
-    private String mSuffix = "user/";
+    private String mSuffix = "stable/";
     private String mBasePath = "";
 
     private AlertDialog mOption;
@@ -175,7 +175,7 @@ public class MainActivity extends Activity {
             String line = "";
             while ((line = in.readLine()) != null) {
                 if (line.contains("Openthos Test")) {
-                    mSuffix = "dev/";
+                    mSuffix = "unstable/";
                     return true;
                 }
             }
