@@ -292,12 +292,12 @@ public class MainActivity extends Activity {
     }
 
     private void initData() {
-        String downloadPath = getDonwloadPath() + "/oto_ota_sign.ver";
+        String downloadPath = getDonwloadPath() + "/oto_ota.ver";
         mOtaFile = new File(downloadPath);
         if (mOtaFile.exists()) {
             mOtaFile.delete();
         }
-        downLoadnewVersion(getDownloadUrl("oto_ota_sign.ver"), downloadPath);
+        downLoadnewVersion(getDownloadUrl("oto_ota.ver"), downloadPath);
     }
 
     private void initView() {
@@ -724,7 +724,7 @@ public class MainActivity extends Activity {
 
             @Override
             public void onSuccess(ResponseInfo<File> responseInfo) {
-                checkUpgradeSignFile(mDownloadFile);
+                checkUpgradeGpgFile(mDownloadFile);
             }
 
             @Override
@@ -732,7 +732,7 @@ public class MainActivity extends Activity {
                 mShowHaveUpdate.setVisibility(View.GONE);
                 mProgressBar.setVisibility(ProgressBar.INVISIBLE);
                 if (s.equals("maybe the file has downloaded completely")) {
-                    checkUpgradeSignFile(mDownloadFile);
+                    checkUpgradeGpgFile(mDownloadFile);
                 } else {
                     Toast.makeText(MainActivity.this, R.string.error, Toast.LENGTH_SHORT).show();
                 }
